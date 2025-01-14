@@ -1,41 +1,89 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-
-# dependencies
-/node_modules
-/.pnp
+# Dependencies
+node_modules/
 .pnp.*
 .yarn/*
 !.yarn/patches
 !.yarn/plugins
 !.yarn/releases
 !.yarn/versions
+package-lock.json
+yarn.lock
 
-# testing
-/coverage
-
-# next.js
+# Build outputs
 /.next/
 /out/
+/build/
+/dist/
+*.tsbuildinfo
 
-# production
-/build
+# Testing
+/coverage/
+.nyc_output/
+/cypress/videos/
+/cypress/screenshots/
 
-# misc
+# Environment files
+.env*
+.env.local
+.env.development
+.env.test
+.env.production
+
+# IDE and Editor files
+.idea/
+.vscode/
+*.swp
+*.swo
 .DS_Store
 *.pem
+.project
+.classpath
+.settings/
+*.sublime-workspace
+*.sublime-project
 
-# debug
+# Debug logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
+debug.log
 
-# env files (can opt-in for committing if needed)
-.env*
+# Runtime data
+pids/
+*.pid
+*.seed
+*.pid.lock
 
-# vercel
-.vercel
+# Cache directories
+.npm/
+.eslintcache
+.stylelintcache
+.next/
+.nuxt/
+.cache/
+.parcel-cache/
 
-# typescript
+# Vercel
+.vercel/
+
+# TypeScript
 *.tsbuildinfo
 next-env.d.ts
+
+# WhatsApp API session files
+whatsapp-api/.wwebjs_auth/
+whatsapp-api/session/
+
+# Temporary files
+*.log
+*.tmp
+.temp/
+.tmp/
+tmp/
+
+# System files
+Thumbs.db
+.DS_Store
+*.pem
+desktop.ini
