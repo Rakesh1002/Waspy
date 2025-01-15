@@ -1,9 +1,12 @@
-from typing import Any, Dict, Optional
-from loguru import logger
-import httpx
 import json
+from typing import Any, Dict, Optional
+
+import httpx
+from loguru import logger
+
 from app.core.config import settings
 from app.utils.error_handler import WhatsAppError
+
 
 class WhatsAppService:
     """WhatsApp API service for sending messages and managing templates."""
@@ -36,13 +39,13 @@ class WhatsAppService:
         """Send message to WhatsApp API."""
         try:
             url = f"/{self.phone_number_id}/messages"
-            
+
             logger.debug("WhatsApp API Request:")
             logger.debug(f"URL: {self.api_url}{url}")
             logger.debug(f"Payload: {json.dumps(payload, indent=2)}")
 
             response = await self.client.post(url, json=payload)
-            
+
             logger.debug(f"Response Status: {response.status_code}")
             logger.debug(f"Response Body: {response.text}")
 
@@ -50,7 +53,7 @@ class WhatsAppService:
                 try:
                     error_data = response.json()
                     error_msg = error_data.get('error', {}).get('message', response.text)
-                except json.JSONDecodeError as e:
+                except json.JSONDecodeError:
                     error_msg = response.text
 
                 raise WhatsAppError(
@@ -64,7 +67,7 @@ class WhatsAppService:
             raise WhatsAppError(message=f"HTTP error: {str(e)}", status_code=500) from e
         except Exception as e:
             raise WhatsAppError(
-                message=f"Unexpected error: {str(e)}", 
+                message=f"Unexpected error: {str(e)}",
                 status_code=500
             ) from e
 
@@ -123,7 +126,7 @@ class WhatsAppService:
                 "type": "text",
                 "text": {"body": message}
             }
-            
+
             logger.debug(f"Text message payload:\n{json.dumps(payload, indent=2)}")
             return await self._send_message(payload)
 
@@ -131,4 +134,4 @@ class WhatsAppService:
             raise WhatsAppError(
                 message=f"Failed to send text message: {str(e)}",
                 status_code=500
-            ) from e 
+            ) from e

@@ -1,5 +1,4 @@
 import json
-import logging
 import re
 from typing import Any, Dict
 
@@ -43,8 +42,7 @@ def log_http_response(response: Any) -> None:
 
 
 def is_valid_whatsapp_message(body: Dict[str, Any]) -> bool:
-    """
-    Check if the incoming webhook event has a valid WhatsApp message structure.
+    """Check if the incoming webhook event has a valid WhatsApp message structure.
     """
     return (
         body.get("object")

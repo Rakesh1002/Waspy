@@ -1,9 +1,6 @@
 """Dependencies for API endpoints."""
 from typing import Generator
 
-from fastapi import Depends
-from sqlalchemy.orm import Session
-
 from app.db.session import SessionLocal
 from app.services.whatsapp_service import WhatsAppService
 

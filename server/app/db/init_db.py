@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 from sqlalchemy.orm import Session
 
 from app.db.session import SessionLocal
-from app.models.order import Order, KnowledgeBase
+from app.models.order import KnowledgeBase, Order
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

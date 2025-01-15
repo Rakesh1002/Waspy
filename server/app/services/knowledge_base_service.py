@@ -1,13 +1,13 @@
-from typing import Any, Dict, List, Optional
+import io
+from typing import Any, Dict, List
+
+import docx
 import pandas as pd
-import numpy as np
-from sqlalchemy import create_engine
-from sqlalchemy.orm import Session
+import PyPDF2
 from loguru import logger
 from openai import AsyncOpenAI
-import docx
-import PyPDF2
-import io
+from sqlalchemy import create_engine
+from sqlalchemy.orm import Session
 
 from app.core.config import settings
 from app.models.order import KnowledgeBase

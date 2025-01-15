@@ -1,17 +1,17 @@
-from typing import Any, Dict, Optional
+import json
+from typing import Any, Dict
+
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response
 from loguru import logger
 from sqlalchemy.orm import Session
+
+from app.api.deps import get_db, get_whatsapp_service
 from app.core.config import settings
-from app.core.security import get_current_user
-from app.schemas.webhook import WebhookRequest, WebhookResponse
+from app.schemas.whatsapp import WhatsAppMessageRequest
 from app.services.whatsapp_bot import WhatsAppBot
 from app.services.whatsapp_service import WhatsAppService
-from app.utils.whatsapp_utils import is_valid_whatsapp_message
-from app.api.deps import get_db, get_whatsapp_service
-from app.schemas.whatsapp import WhatsAppMessageRequest
-import json
 from app.utils.error_handler import handle_whatsapp_error
+from app.utils.whatsapp_utils import is_valid_whatsapp_message
 
 router = APIRouter()
 whatsapp_bot = WhatsAppBot()
@@ -97,13 +97,13 @@ async def send_message(
     try:
         request_dict = request.dict()
         logger.debug(f"Send message request:\n{json.dumps(request_dict, indent=2)}")
-        
+
         if not request.use_template and not request.message:
             raise WhatsAppError(
                 message="Message is required when not using template",
                 status_code=400
             )
-        
+
         if request.use_template:
             response = await whatsapp_service.send_template_message(
                 phone_number=request.phone_number,

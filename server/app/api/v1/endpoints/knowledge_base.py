@@ -1,11 +1,12 @@
 from typing import Any, Dict, List
+
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
-from sqlalchemy.orm import Session
 from loguru import logger
+from sqlalchemy.orm import Session
 
 from app.core.security import get_current_user
-from app.services.knowledge_base_service import KnowledgeBaseService
 from app.db.session import get_db
+from app.services.knowledge_base_service import KnowledgeBaseService
 
 router = APIRouter()
 kb_service = KnowledgeBaseService()

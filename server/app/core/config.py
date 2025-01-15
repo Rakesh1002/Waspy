@@ -1,8 +1,6 @@
-from typing import List, Union, Optional
-from urllib.parse import urlparse
-import os
+from typing import List, Union
 
-from pydantic import AnyHttpUrl, validator, PostgresDsn
+from pydantic import validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 

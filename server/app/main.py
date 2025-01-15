@@ -1,10 +1,9 @@
 import uvicorn
-from app.api.v1.router import api_router
-from fastapi import Depends, FastAPI, HTTPException
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.security import OAuth2PasswordBearer
 from loguru import logger
 
+from app.api.v1.router import api_router
 from app.core.config import settings
 from app.core.logger import setup_logging
 

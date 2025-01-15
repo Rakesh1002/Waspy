@@ -1,17 +1,16 @@
 import json
-from typing import Any, Dict, List
+from typing import Any, Dict
 
+import httpx
 import requests
 from fastapi import HTTPException
 from loguru import logger
 from sqlalchemy.orm import Session
-import httpx
 
 from app.core.config import settings
 from app.services.openai_service import OpenAIService
 from app.utils.whatsapp_utils import (
     extract_whatsapp_message_data,
-    get_text_message_input,
     is_valid_whatsapp_message,
     log_http_response,
     process_text_for_whatsapp,

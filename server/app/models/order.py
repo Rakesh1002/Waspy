@@ -1,8 +1,7 @@
 """Database models for orders and knowledge base."""
 from datetime import datetime
-from typing import Optional
 
-from sqlalchemy import Column, Integer, String, DateTime, JSON, Float
+from sqlalchemy import JSON, Column, DateTime, Float, Integer, String
 from sqlalchemy.dialects.postgresql import ARRAY
 
 from app.db.base_class import Base

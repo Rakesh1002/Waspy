@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 from typing import Any, Dict, Optional
 
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from loguru import logger

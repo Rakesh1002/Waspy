@@ -1,5 +1,7 @@
-from typing import Optional, Dict
+from typing import Dict, Optional
+
 from pydantic import BaseModel
+
 
 class WhatsAppTemplate(BaseModel):
     name: str
@@ -11,4 +13,4 @@ class WhatsAppMessageRequest(BaseModel):
     message: Optional[str] = None
     use_template: bool = False
     template_name: Optional[str] = None
-    template: Optional[WhatsAppTemplate] = None 
+    template: Optional[WhatsAppTemplate] = None

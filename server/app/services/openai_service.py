@@ -1,13 +1,14 @@
 """OpenAI service for generating responses."""
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional
+
 import pandas as pd
-from sqlalchemy.orm import Session
-from sqlalchemy import or_
 from loguru import logger
 from openai import AsyncOpenAI
+from sqlalchemy import or_
+from sqlalchemy.orm import Session
 
 from app.core.config import settings
-from app.models.order import Order, KnowledgeBase
+from app.models.order import KnowledgeBase, Order
 
 SUPPORT_SYSTEM_PROMPT = """You are a helpful WhatsApp Business assistant. Your role is to:
 1. Answer questions about products and services
@@ -326,7 +327,7 @@ Provide the template in the following format:
             2. Product information
             3. Shipping updates
             4. General support questions
-            
+
             Always be polite and professional. If you need to query order details, use the provided functions.
             """,
             model="gpt-4o-mini",
