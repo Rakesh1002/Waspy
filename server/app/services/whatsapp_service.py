@@ -98,18 +98,26 @@ class WhatsAppService:
             if template_data and template_data.get("components"):
                 components = template_data["components"]
                 if isinstance(components, list) and all(
-                    isinstance(c, dict) and "type" in c and "parameters" in c
+                    isinstance(c, dict) 
+                    and "type" in c 
+                    and "parameters" in c
                     for c in components
                 ):
                     payload["template"]["components"] = components
 
-            logger.debug(f"Template message payload:\n{json.dumps(payload, indent=2)}")
+            logger.debug(
+                f"Template message payload:\n"
+                f"{json.dumps(payload, indent=2)}"
+            )
             return await self._send_message(payload)
 
         except Exception as e:
             if "Template name does not exist" in str(e):
                 raise WhatsAppError(
-                    message=f"Template '{template_name}' not found in language '{language_code}'",
+                    message=(
+                        f"Template '{template_name}' not found "
+                        f"in language '{language_code}'"
+                    ),
                     status_code=404
                 ) from e
             raise WhatsAppError(
