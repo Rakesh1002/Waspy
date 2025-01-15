@@ -18,7 +18,7 @@ type Campaign = {
 };
 
 export function CampaignList() {
-  // setCampaigns will be used when integrating with API
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [campaigns, setCampaigns] = useState<Campaign[]>([
     // Mock data - replace with API call
     {
