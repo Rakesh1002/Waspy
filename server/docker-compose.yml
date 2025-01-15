@@ -1,0 +1,17 @@
+version: "3.8"
+
+services:
+  api:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+    environment:
+      - WHATSAPP_TOKEN=${WHATSAPP_TOKEN}
+      - VERIFY_TOKEN=${VERIFY_TOKEN}
+      - PHONE_NUMBER_ID=${PHONE_NUMBER_ID}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - SECRET_KEY=${SECRET_KEY}
+    restart: unless-stopped
+    command: poetry run uvicorn main:app --host 0.0.0.0 --port 8000 --reload

@@ -1,216 +1,232 @@
-# WhatsApp Support Bot Platform
+# WASPY
 
 An enterprise-grade AI-powered WhatsApp support automation platform built with Next.js and FastAPI.
 
-## Table of Contents
+## Tech Stack
 
-- [Features](#features)
-- [Architecture](#architecture)
-- [Development Guide](#development-guide)
-- [Deployment Guide](#deployment-guide)
-- [Testing Guide](#testing-guide)
-- [API Reference](#api-reference)
-- [Contributing](#contributing)
+### Frontend
+
+- Next.js 15 with App Router
+- TypeScript
+- Tailwind CSS
+- Shadcn/UI Components
+- NextAuth.js for authentication
+- Framer Motion for animations
+
+### Backend
+
+- FastAPI
+- PostgreSQL with pgvector
+- Redis for caching/queues
+- MongoDB for conversation history
+- OpenAI/Claude for AI processing
+- Alembic for migrations
+
+### Infrastructure
+
+- Docker & Docker Compose
+- Poetry for Python dependency management
+- pnpm for Node.js package management
+- GitHub Actions for CI/CD
+
+## Project Structure
+
+```bash
+├── client/ # Next.js frontend
+│ ├── src/
+│ │ ├── app/ # Next.js app router
+│ │ ├── components/ # React components
+│ │ ├── lib/ # Utilities and helpers
+│ │ ├── hooks/ # Custom React hooks
+│ │ └── types/ # TypeScript definitions
+│ ├── public/ # Static assets
+│ └── tests/ # Frontend tests
+├── server/ # FastAPI backend
+│ ├── app/
+│ │ ├── api/ # API routes
+│ │ ├── core/ # Core functionality
+│ │ ├── models/ # Database models
+│ │ ├── services/ # Business logic
+│ │ └── utils/ # Utilities
+│ ├── tests/ # Backend tests
+│ └── alembic/ # Database migrations
+├── shared/ # Shared resources
+│ ├── types/ # Shared type definitions
+│ └── utils/ # Shared utilities
+├── docs/ # Documentation
+│ ├── api/ # API documentation
+│ ├── architecture/ # Architecture docs
+│ └── deployment/ # Deployment guides
+├── scripts/ # Development scripts
+└── docker/ # Docker configurations
+```
+
+### Architecture
+
+┌─────────────┐ ┌──────────────┐ ┌─────────────┐
+│ Next.js │────▶ │ FastAPI │────▶│ AI Services │
+│ Frontend │ │ Backend │ │ |
+└─────────────┘ └──────────────┘ └─────────────┘
+│ │ │
+│ │ │
+│ ┌──────────────┐ │  
+ └───────────▶ │ Redis │◀───────────┘
+│ Queue │
+└──────────────┘
+│
+▼
+┌─────────────┐ ┌──────────────┐ ┌─────────────┐
+│ Vector DB │◀───▶ │ PostgreSQL │────▶│ MongoDB │
+│ (Search) │ │ (Data) │ │ (History) │
+└─────────────┘ └──────────────┘ └─────────────┘
 
 ## Features
 
-- 🤖 AI-powered chatbot with Anthropic Claude 3.5 integration
-- 📱 WhatsApp Business API integration
-- 📚 Document processing & vector search
-- 📊 Real-time analytics dashboard
-- 🔐 Enterprise-grade security
-- 🔄 Horizontal scaling support
-- 📈 Performance monitoring
+### Current Implementation
 
-🚧 In Progress:
-- [ ] Document processing & vector search
+- 🔐 Authentication & Authorization
+
+  - Google OAuth integration
+  - Role-based access control (to be implemented)
+  - Session management
+
+- 💬 WhatsApp Integration
+
+  - Message sending/receiving
+  - Template management (to be implemented)
+  - Media handling (to be implemented)
+  - Webhook processing
+
+- 🤖 AI Capabilities
+
+  - OpenAI/Claude integration
+  - Context-aware responses
+  - Knowledge base integration
+  - Vector search
+
+- 📊 Analytics & Monitoring
+  - Real-time dashboard (to be implemented)
+  - Message statistics (to be implemented)
+  - Response metrics (to be implemented)
+  - User engagement tracking (to be implemented)
+
+### Upcoming Features
+
+#### Phase 1: Core Enhancements (Q2 2024)
+
 - [ ] Multi-language support
-- [ ] Custom bot training
-- [ ] Advanced analytics
-- [ ] Team collaboration features
+- [ ] Advanced analytics dashboard
+- [ ] Custom bot training interface
+- [ ] Bulk message campaigns
+- [ ] A/B testing capabilities
 
-### System Components
+#### Phase 2: Enterprise Features (Q3 2024)
 
-```ascii
-┌─────────────┐     ┌──────────────┐     ┌─────────────┐
-│   Next.js   │────▶│   FastAPI    │────▶│   OpenAI    │
-│  Frontend   │     │   Backend    │     │   Engine    │
-└─────────────┘     └──────────────┘     └─────────────┘
-       │                    │                    │
-       │                    ▼                    │
-       │            ┌──────────────┐             │
-       └───────────▶│    Redis     │◀────────────┘
-                    │    Queue     │
-                    └──────────────┘
-                           │
-                           ▼
-┌─────────────┐     ┌──────────────┐     ┌─────────────┐
-│  Pinecone   │◀───▶│  PostgreSQL  │────▶│  MongoDB    │
-│   Vector    │     │     Data     │     │   History   │
-└─────────────┘     └──────────────┘     └─────────────┘
-```
+- [ ] Team collaboration tools
+- [ ] Audit logging
+- [ ] Custom integrations
+- [ ] Advanced security features
+- [ ] High availability setup
 
-## Development Guide
+#### Phase 3: Scale & Optimize (Q4 2024)
 
-### Prerequisites
+- [ ] Performance optimization
+- [ ] Load balancing
+- [ ] Auto-scaling
+- [ ] Disaster recovery
+- [ ] Geographic distribution
 
-1. Install Required Tools:
+## Quick Start
 
-```bash
-# Install Python 3.9+
-pyenv install 3.9.13
-pyenv global 3.9.13
-
-# Install Poetry
-curl -sSL https://install.python-poetry.org | python3 -
-
-# Install Node.js 18+
-nvm install 18
-nvm use 18
-
-# Install Docker
-# Follow instructions at https://docs.docker.com/get-docker/
-```
-
-2. Clone and Setup:
+1.Clone and setup:
 
 ```bash
 git clone https://github.com/yourusername/waspy.git
 cd waspy
 
-# Install frontend dependencies
-npm install
+# Install pnpm if not installed
+npm install -g pnpm
 
-# Install backend dependencies
-cd whatsapp-api
-npm install
+# Install dependencies
+pnpm install
 ```
 
-### Local Development
-
-1. Start Infrastructure:
+2.Install dependencies
 
 ```bash
-# Start required services
-docker-compose -f docker-compose.dev.yml up -d
-
-# Verify services are running
-docker-compose ps
+pnpm install # Root dependencies
+cd client && pnpm install # Frontend dependencies
+cd ../server && poetry install # Backend dependencies
 ```
 
-2. Setup Database:
+3.Configure environment:
 
 ```bash
-# Create database
-poetry run python scripts/create_db.py
-
-# Run migrations
-poetry run alembic upgrade head
-
-# Seed initial data
-poetry run python scripts/seed_data.py
-```
-
-3. Configure Environment:
-
-```bash
-# Copy environment files
 cp .env.example .env
-
-# WhatsApp API directory
-cd whatsapp-api
-cp .env.example .env
+cd client && cp .env.example .env
+cd ../server && cp .env.example .env
 ```
 
-4. Start Development Servers:
+4.Run the development server:
+
+Start infrastructure
 
 ```bash
-# Terminal 1: Start backend
-poetry run uvicorn backend.main:app --reload
-
-# Terminal 2: Start frontend
 npm run dev
-
-# Terminal 3: Start worker
-poetry run python -m backend.worker
 ```
 
-## Project Roadmap
+Or start services individually:
 
-### Phase 1: Core Platform (Current) ⏳
+```bash
+npm run dev:frontend # Terminal 1
+npm run dev:backend # Terminal 2
+```
 
-- [x] Basic authentication and user management
-- [x] WhatsApp Business API integration
-- [x] Simple AI chat responses
-- [x] Real-time chat interface
-- [ ] Basic analytics dashboard
-- [ ] Initial deployment setup
+5.Access the application:
 
-### Phase 2: Enhanced Features 🔄
+- Frontend: http://localhost:3000
+- Backend API: http://localhost:8000
+- API Docs: http://localhost:8000/docs
 
-- [ ] Document ingestion and processing
-- [ ] Vector search implementation
-- [ ] Custom bot training interface
-- [ ] Advanced analytics and reporting
-- [ ] Team collaboration features
-- [ ] Multi-language support
+## Deployment
 
-### Phase 3: Enterprise Features 🎯
+### Production Setup
 
-- [ ] Role-based access control
-- [ ] Audit logging
-- [ ] Custom integrations
-- [ ] Advanced security features
-- [ ] High availability setup
-- [ ] Automated backups
+1. Build Docker images
+2. Configure environment variables
+3. Setup database migrations
+4. Configure reverse proxy
+5. Setup SSL certificates
 
-## Remaining Tasks
+### Scaling Considerations
 
-### High Priority
-1. Complete the analytics dashboard implementation
-2. Add document processing capabilities
-3. Implement vector search for knowledge base
-4. Set up automated testing pipeline
-5. Add error monitoring and logging
-
-### Medium Priority
-1. Enhance bot training interface
-2. Add support for multiple languages
-3. Implement team collaboration features
-4. Create comprehensive API documentation
-5. Add integration tests
-
-### Low Priority
-1. Add more customization options
-2. Implement advanced security features
-3. Create admin dashboard
-4. Add support for more messaging platforms
-5. Implement automated backups
+- Use container orchestration (Kubernetes)
+- Implement caching strategies
+- Setup load balancing
+- Configure auto-scaling
+- Monitor performance metrics
 
 ## Contributing
 
 1. Fork the repository
 2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+3. Commit your changes (`git commit -m 'feat: add amazing feature'`)
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
-## Development Guidelines
+### Development Guidelines
 
-- Follow the established code style and conventions
-- Write tests for new features
-- Update documentation as needed
-- Use conventional commits
-- Keep PRs focused and manageable in size
+- Follow conventional commits
+- Write comprehensive tests
+- Update documentation
+- Follow code style guidelines
+- Review security best practices
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License - see [LICENSE](LICENSE) for details.
 
 ## Support
 
-For support, email support@example.com or join our Discord channel.
-
----
-
-**Note**: This is an active development project. Features and priorities may change based on user feedback and business requirements.
+- Documentation: [docs/](docs/)
+- Issues: GitHub Issues

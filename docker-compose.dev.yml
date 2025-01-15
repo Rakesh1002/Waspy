@@ -1,0 +1,33 @@
+services:
+  postgres:
+    image: ankane/pgvector:latest
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: waspy
+      POSTGRES_PASSWORD: waspy
+      POSTGRES_DB: waspy
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+  mongodb:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: waspy
+      MONGO_INITDB_ROOT_PASSWORD: waspy
+    volumes:
+      - mongodb_data:/data/db
+
+volumes:
+  postgres_data:
+  redis_data:
+  mongodb_data:

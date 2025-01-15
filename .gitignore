@@ -8,19 +8,22 @@ node_modules/
 !.yarn/versions
 package-lock.json
 yarn.lock
+pnpm-lock.yaml
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+.venv/
+env/
 
 # Build outputs
+/dist/
+/build/
 /.next/
 /out/
-/build/
-/dist/
 *.tsbuildinfo
-
-# Testing
-/coverage/
-.nyc_output/
-/cypress/videos/
-/cypress/screenshots/
 
 # Environment files
 .env*
@@ -48,12 +51,13 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 debug.log
+*.log
 
-# Runtime data
-pids/
-*.pid
-*.seed
-*.pid.lock
+# Testing
+/coverage/
+.nyc_output/
+/cypress/videos/
+/cypress/screenshots/
 
 # Cache directories
 .npm/
@@ -64,19 +68,35 @@ pids/
 .cache/
 .parcel-cache/
 
+# Python specific
+*.egg-info/
+.installed.cfg
+*.egg
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+.Python
+build/
+develop-eggs/
+downloads/
+eggs/
+
+# Poetry
+poetry.lock
+
 # Vercel
 .vercel/
 
-# TypeScript
-*.tsbuildinfo
-next-env.d.ts
-
-# WhatsApp API session files
-whatsapp-api/.wwebjs_auth/
-whatsapp-api/session/
+# Database
+*.sqlite3
+*.db
 
 # Temporary files
-*.log
 *.tmp
 .temp/
 .tmp/
@@ -84,6 +104,69 @@ tmp/
 
 # System files
 Thumbs.db
-.DS_Store
-*.pem
 desktop.ini
+
+# Additional Python ignores
+*.pyc
+__pycache__/
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+instance/
+.webassets-cache
+celerybeat-schedule
+celerybeat.pid
+
+# Additional Node/Frontend ignores
+.turbo
+storybook-static/
+*.tsbuildinfo
+.env*.local
+next-env.d.ts
+
+# Additional IDE ignores
+.history/
+*.code-workspace
+.settings/
+.project
+.factorypath
+
+# Additional OS files
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+*.lnk
+
+# Additional build/dist ignores
+dist-ssr/
+*.local
+.output/
+
+# Additional test/coverage ignores
+.coverage.*
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
+
+# Docker
+*.env
+.docker/
+docker-compose.override.yml
+
+# Misc
+*.bak
+*.swp
+*.swo
+*~
+.directory
+
+# ML/AI specific
+*.onnx
+*.pt
+*.pth
+.wandb/
+runs/

@@ -1,0 +1,49 @@
+[tool.poetry]
+name = "waspy"
+version = "0.1.0"
+description = "WhatsApp Business API with AI-powered knowledge base"
+authors = ["Your Name <your.email@example.com>"]
+readme = "README.md"
+packages = [{include = "app"}]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+fastapi = "^0.109.0"
+uvicorn = "^0.27.0"
+pydantic = "^2.5.3"
+pydantic-settings = "^2.1.0"
+sqlalchemy = "^2.0.25"
+alembic = "^1.13.1"
+psycopg2-binary = "^2.9.9"
+loguru = "^0.7.2"
+openai = "^1.8.0"
+pandas = "^2.2.0"
+numpy = "^1.26.3"
+python-docx = "^1.1.0"
+pypdf2 = "^3.0.1"
+openpyxl = "^3.1.2"
+pgvector = "^0.2.4"
+aiofiles = "^23.2.1"
+httpx = "^0.26.0"
+python-multipart = "^0.0.6"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.4.4"
+pytest-asyncio = "^0.23.3"
+pytest-cov = "^4.1.0"
+black = "^23.12.1"
+ruff = "^0.1.14"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.ruff]
+line-length = 88
+target-version = "py39"
+select = ["E", "F", "I", "N", "W", "B", "C", "D"]
+ignore = ["D100", "D104", "D107"]
+
+[tool.ruff.per-file-ignores]
+"__init__.py" = ["F401"]
+"tests/*" = ["D"]
