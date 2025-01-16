@@ -1,0 +1,16 @@
+<svg width="120" height="40" viewBox="0 0 120 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background Gradient -->
+  <defs>
+    <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#9333EA" />
+      <stop offset="50%" style="stop-color:#3B82F6" />
+      <stop offset="100%" style="stop-color:#14B8A6" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Chat Bubble Icon -->
+  <path d="M20 8C13.373 8 8 12.373 8 18C8 21.084 9.574 23.834 12 25.562V32L18.438 28.562C18.946 28.654 19.466 28.75 20 28.75C26.627 28.75 32 24.377 32 18.75C32 13.123 26.627 8 20 8Z" fill="url(#gradient)"/>
+  
+  <!-- WASPY Text -->
+  <text x="40" y="24" font-family="Arial, sans-serif" font-weight="700" font-size="20" fill="currentColor">WASPY</text>
+</svg> 

@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "docker-compose -f docker-compose.dev.yml up -d && pnpm run dev:services",
+    "predev": "pnpm install && cd client && pnpm install && npx prisma generate && cd ../server && poetry install",
+    "dev": "docker compose -f docker-compose.dev.yml up -d && pnpm run dev:services || docker-compose -f docker-compose.dev.yml up -d && pnpm run dev:services",
     "dev:services": "concurrently \"pnpm run dev:backend\" \"pnpm run dev:frontend\"",
     "dev:tunnel": "ngrok http --domain=pegasus-still-lovely.ngrok-free.app 8000",
     "dev:frontend": "cd client && pnpm dev",
@@ -24,7 +25,8 @@
     "format:all": "concurrently \"pnpm format:frontend\" \"pnpm format:backend\"",
     "format:frontend": "cd client && pnpm format",
     "format:backend": "cd server && poetry run black .",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "dev:no-docker": "pnpm run dev:services"
   },
   "devDependencies": {
     "concurrently": "^8.2.2",
@@ -36,5 +38,6 @@
   "engines": {
     "node": ">=18.0.0",
     "pnpm": ">=8.0.0"
-  }
+  },
+  "packageManager": "pnpm@9.15.3+sha512.1f79bc245a66eb0b07c5d4d83131240774642caaa86ef7d0434ab47c0d16f66b04e21e0c086eb61e62c77efc4d7f7ec071afad3796af64892fae66509173893a"
 }

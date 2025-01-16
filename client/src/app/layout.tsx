@@ -16,8 +16,54 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "WASPY",
-  description: "AI-powered WhatsApp Support Platform",
+  title: {
+    default: "WASPY - AI-powered WhatsApp Support Platform",
+    template: "%s | WASPY",
+  },
+  description:
+    "Build, deploy, and scale AI-powered WhatsApp bots with our enterprise platform. Create intelligent support operations with no coding required.",
+  keywords: [
+    "WhatsApp",
+    "AI",
+    "chatbot",
+    "customer support",
+    "automation",
+    "enterprise",
+    "support platform",
+  ],
+  authors: [{ name: "WASPY Team" }],
+  creator: "WASPY",
+  publisher: "WASPY",
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://waspy.ai"),
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: "/",
+    title: "WASPY - AI-powered WhatsApp Support Platform",
+    description:
+      "Build, deploy, and scale AI-powered WhatsApp bots with our enterprise platform. Create intelligent support operations with no coding required.",
+    siteName: "WASPY",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "WASPY - AI-powered WhatsApp Support Platform",
+    description:
+      "Build, deploy, and scale AI-powered WhatsApp bots with our enterprise platform. Create intelligent support operations with no coding required.",
+    creator: "@waspyai",
+  },
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "32x32" },
+      { url: "/favicon.svg", type: "image/svg+xml" },
+    ],
+    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180" }],
+  },
+  manifest: "/site.webmanifest",
 };
 
 export default function RootLayout({
@@ -27,6 +73,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+        <link rel="manifest" href="/site.webmanifest" />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         suppressHydrationWarning

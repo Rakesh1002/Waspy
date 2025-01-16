@@ -125,7 +125,6 @@ storybook-static/
 *.tsbuildinfo
 .env*.local
 next-env.d.ts
-
 # Additional IDE ignores
 .history/
 *.code-workspace
@@ -170,3 +169,4 @@ docker-compose.override.yml
 *.pth
 .wandb/
 runs/
+

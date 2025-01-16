@@ -44,3 +44,12 @@ poetry run alembic upgrade head
 ```bash
 poetry run uvicorn app.main:app --reload --port 8000
 ```
+
+6. Set up Postgres with pgvector extension:
+
+```bash
+   brew install postgresql
+   brew install pgvector
+   brew services start postgresql
+   psql -d postgres -c "CREATE EXTENSION vector;"
+```

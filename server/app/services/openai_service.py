@@ -191,7 +191,7 @@ class OpenAIService:
                 f"Generating response with context. Orders found: {len(order_details)}"
             )
             response = await self.client.chat.completions.create(
-                model="gpt-4-turbo-preview",
+                model="gpt-4o-mini",
                 messages=messages,
                 max_tokens=500,
                 temperature=0.7,
