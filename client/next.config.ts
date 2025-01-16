@@ -9,7 +9,6 @@ const nextConfig: NextConfig = {
     domains: ['lh3.googleusercontent.com'], // For Google OAuth profile pictures
   },
   // Production optimizations
-  swcMinify: true,
   poweredByHeader: false,
   reactStrictMode: true,
 };
