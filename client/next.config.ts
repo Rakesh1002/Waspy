@@ -1,7 +1,17 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  env: {
+    API_URL: process.env.API_URL,
+    API_KEY: process.env.API_KEY,
+  },
+  images: {
+    domains: ['lh3.googleusercontent.com'], // For Google OAuth profile pictures
+  },
+  // Production optimizations
+  swcMinify: true,
+  poweredByHeader: false,
+  reactStrictMode: true,
 };
 
 export default nextConfig;

@@ -26,12 +26,14 @@
     "format:frontend": "cd client && pnpm format",
     "format:backend": "cd server && poetry run black .",
     "prepare": "husky install",
-    "dev:no-docker": "pnpm run dev:services"
+    "dev:no-docker": "pnpm run dev:services",
+    "generate-logos": "node scripts/generate-logos.js"
   },
   "devDependencies": {
     "concurrently": "^8.2.2",
     "husky": "^9.0.11",
-    "prettier": "^3.2.5"
+    "prettier": "^3.2.5",
+    "sharp": "^0.32.6"
   },
   "engines": {
     "node": ">=18.0.0",
