@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { MessageSquare } from "lucide-react";
 import { Container } from "@/components/ui/container";
 import Image from "next/image";
 

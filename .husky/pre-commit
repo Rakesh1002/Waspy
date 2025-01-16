@@ -1,20 +1,4 @@
-#!/usr/bin/env sh
-. "$(dirname -- "$0")/_/husky.sh"
+#!/bin/sh
 
-echo "Running pre-commit hooks..."
-
-# Run linting
-echo "Running lint..."
-pnpm lint || {
-  echo "Linting failed. Please fix the errors and try again."
-  exit 1
-}
-
-# Run formatting
-echo "Running format..."
-pnpm format || {
-  echo "Formatting failed. Please fix the errors and try again."
-  exit 1
-}
-
-echo "All pre-commit hooks passed!" 
+# Navigate to client directory and run lint
+cd client && pnpm lint || exit 1 

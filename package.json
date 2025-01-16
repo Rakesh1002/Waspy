@@ -31,8 +31,6 @@
   "devDependencies": {
     "concurrently": "^8.2.2",
     "husky": "^9.0.11",
-    "@commitlint/cli": "^19.0.3",
-    "@commitlint/config-conventional": "^19.0.3",
     "prettier": "^3.2.5"
   },
   "engines": {
