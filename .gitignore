@@ -170,3 +170,10 @@ docker-compose.override.yml
 .wandb/
 runs/
 
+# Server logs and process files
+server.log
+server.pid
+tunnel.log
+tunnel.pid
+nohup.out
+

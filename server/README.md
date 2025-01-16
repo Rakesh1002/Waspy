@@ -27,7 +27,7 @@ CREATE EXTENSION vector;
 3. Configure environment variables in `.env`:
 
 ```
-DATABASE_URL=postgresql://user:password@localhost:5432/waspy
+DATABASE_URL=postgresql://user:password@localhost:5433/waspy
 OPENAI_API_KEY=your_api_key
 WHATSAPP_API_TOKEN=your_whatsapp_token
 WHATSAPP_PHONE_NUMBER_ID=your_phone_number_id

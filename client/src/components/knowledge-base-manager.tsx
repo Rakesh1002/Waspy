@@ -276,7 +276,7 @@ export function KnowledgeBaseManager() {
                 <div className="space-y-2">
                   <label className="text-sm font-medium">Port</label>
                   <Input
-                    placeholder="5432"
+                    placeholder="5433"
                     value={dbConfig.port}
                     onChange={(e) =>
                       setDbConfig({ ...dbConfig, port: e.target.value })

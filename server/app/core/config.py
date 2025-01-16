@@ -9,7 +9,7 @@ class Settings(BaseSettings):
     PROJECT_NAME: str = "WhatsApp Bot API"
 
     # CORS Configuration
-    CORS_ORIGINS: List[str] = ["http://localhost:3000"]
+    CORS_ORIGINS: List[str] = ["*"]
 
     @validator("CORS_ORIGINS", pre=True)
     def assemble_cors_origins(cls, v: Union[str, List[str]]) -> List[str]:
@@ -24,10 +24,10 @@ class Settings(BaseSettings):
 
     # Database Configuration
     POSTGRES_SERVER: str = "localhost"
-    POSTGRES_USER: str = "postgres"
-    POSTGRES_PASSWORD: str = "postgres"
+    POSTGRES_USER: str = "waspy"
+    POSTGRES_PASSWORD: str = "waspy"
     POSTGRES_DB: str = "waspy"
-    POSTGRES_PORT: str = "5432"
+    POSTGRES_PORT: str = "5433"
 
     @property
     def DATABASE_URL(self) -> str:
