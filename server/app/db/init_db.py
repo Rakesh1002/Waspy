@@ -42,6 +42,36 @@ ORDERS = [
         "status": "cancelled",
         "delivery_date": None,
     },
+    {
+        "order_id": "ORD111222",
+        "customer_phone": "+919019545645",
+        "status": "delivered",
+        "delivery_date": datetime.utcnow() - timedelta(days=5),
+    },
+    {
+        "order_id": "ORD333444",
+        "customer_phone": "+919019545645",
+        "status": "processing",
+        "delivery_date": datetime.utcnow() + timedelta(days=2),
+    },
+    {
+        "order_id": "ORD555666",
+        "customer_phone": "+919019545645",
+        "status": "shipped",
+        "delivery_date": datetime.utcnow() + timedelta(days=1),
+    },
+    {
+        "order_id": "ORD777888",
+        "customer_phone": "+919019545645",
+        "status": "cancelled",
+        "delivery_date": None,
+    },
+    {
+        "order_id": "ORD999000",
+        "customer_phone": "+919019545645",
+        "status": "pending",
+        "delivery_date": datetime.utcnow() + timedelta(days=4),
+    },
 ]
 
 # Sample knowledge base data

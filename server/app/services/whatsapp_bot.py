@@ -253,41 +253,32 @@ class WhatsAppBot:
                 if status == "APPROVED":
                     components = template.get("components", [])
                     parameters = []
-                    requires_message = False
                     variables_count = 0
 
+                    # Process each component
                     for component in components:
                         comp_type = component.get("type", "").upper()
-                        logger.debug(
-                            "Component type: %s for template: %s",
-                            comp_type, name
-                        )
-
-                        # Check for variables in text
-                        if "text" in component:
-                            text = component.get("text", "")
-                            variables = text.count("{{")
-                            variables_count += variables
-
-                            if variables > 0:
-                                requires_message = True
-
-                        if comp_type in ["BODY", "HEADER"]:
-                            parameters.append(
-                                {
-                                    "type": comp_type.lower(),
+                        
+                        # Count actual parameters in the component
+                        if "parameters" in component:
+                            param_count = len(component.get("parameters", []))
+                            variables_count += param_count
+                            
+                            if param_count > 0:
+                                parameters.append({
+                                    "type": comp_type,
                                     "format": component.get("format", "TEXT"),
                                     "text": component.get("text", ""),
                                     "example": component.get("example", {}),
-                                }
-                            )
+                                    "param_count": param_count
+                                })
 
                     processed_templates[name] = {
                         "name": name,
                         "description": template.get("category", "").title(),
                         "category": template.get("category"),
                         "parameters": parameters,
-                        "requiresMessage": requires_message,
+                        "requiresMessage": variables_count > 0,
                         "language": template.get("language"),
                         "components": components,
                         "variables_count": variables_count,

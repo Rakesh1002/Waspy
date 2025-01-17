@@ -85,6 +85,7 @@ class WhatsAppService:
                 else "en"
             )
 
+            # Basic template payload
             payload = {
                 "messaging_product": "whatsapp",
                 "to": phone_number,
@@ -95,35 +96,36 @@ class WhatsAppService:
                 }
             }
 
-            if template_data and template_data.get("components"):
+            # Only add components if they exist and are valid
+            if template_data and "components" in template_data:
+                # Validate components structure
                 components = template_data["components"]
-                if isinstance(components, list) and all(
-                    isinstance(c, dict) 
-                    and "type" in c 
-                    and "parameters" in c
-                    for c in components
-                ):
-                    payload["template"]["components"] = components
+                if isinstance(components, list):
+                    # Filter out any components without parameters
+                    valid_components = [
+                        comp for comp in components 
+                        if isinstance(comp, dict) 
+                        and comp.get("type") 
+                        and comp.get("parameters")
+                        and isinstance(comp["parameters"], list)
+                    ]
+                    
+                    if valid_components:
+                        payload["template"]["components"] = valid_components
 
-            logger.debug(
-                f"Template message payload:\n"
-                f"{json.dumps(payload, indent=2)}"
-            )
+            logger.debug(f"Template message payload:\n{json.dumps(payload, indent=2)}")
             return await self._send_message(payload)
 
         except Exception as e:
             if "Template name does not exist" in str(e):
                 raise WhatsAppError(
-                    message=(
-                        f"Template '{template_name}' not found "
-                        f"in language '{language_code}'"
-                    ),
+                    message=f"Template '{template_name}' not found in language '{language_code}'",
                     status_code=404
-                ) from e
+                )
             raise WhatsAppError(
                 message=f"Failed to send template message: {str(e)}",
                 status_code=500
-            ) from e
+            )
 
     async def send_text_message(self, phone_number: str, message: str) -> Dict[str, Any]:
         """Send a text message."""

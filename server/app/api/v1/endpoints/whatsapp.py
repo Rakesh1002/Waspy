@@ -12,6 +12,7 @@ from app.services.whatsapp_bot import WhatsAppBot
 from app.services.whatsapp_service import WhatsAppService
 from app.utils.error_handler import handle_whatsapp_error
 from app.utils.whatsapp_utils import is_valid_whatsapp_message
+from app.utils.errors import WhatsAppError
 
 router = APIRouter()
 whatsapp_bot = WhatsAppBot()

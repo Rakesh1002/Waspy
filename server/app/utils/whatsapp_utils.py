@@ -54,15 +54,50 @@ def is_valid_whatsapp_message(body: Dict[str, Any]) -> bool:
     )
 
 
-def extract_whatsapp_message_data(body: Dict[str, Any]) -> Dict[str, str]:
-    """Extract relevant data from WhatsApp message webhook."""
+def extract_whatsapp_message_data(body: dict) -> dict:
+    """Extract message data from WhatsApp webhook body."""
     try:
-        wa_id = body["entry"][0]["changes"][0]["value"]["contacts"][0]["wa_id"]
-        name = body["entry"][0]["changes"][0]["value"]["contacts"][0]["profile"]["name"]
-        message = body["entry"][0]["changes"][0]["value"]["messages"][0]
-        message_body = message["text"]["body"]
-
-        return {"wa_id": wa_id, "name": name, "message": message_body}
-    except (KeyError, IndexError) as e:
-        logger.error("Error extracting WhatsApp message data: %s", str(e))
+        entry = body["entry"][0]
+        changes = entry["changes"][0]
+        value = changes["value"]
+        
+        # Extract contact info
+        contact = value["contacts"][0]
+        wa_id = contact["wa_id"]
+        name = contact["profile"]["name"]
+        
+        message = value["messages"][0]
+        
+        # Get basic message info
+        message_data = {
+            "from": message["from"],
+            "wa_id": wa_id,
+            "name": name,
+            "message_id": message["id"],
+            "timestamp": message["timestamp"],
+            "type": message["type"]
+        }
+        
+        # Handle different message types
+        if message["type"] == "text":
+            message_data["message"] = message["text"]["body"]
+        elif message["type"] == "audio":
+            message_data["message"] = "[Audio Message]"
+            message_data["audio"] = message["audio"]
+        elif message["type"] == "image":
+            message_data["message"] = "[Image Message]"
+            message_data["image"] = message["image"]
+        elif message["type"] == "video":
+            message_data["message"] = "[Video Message]"
+            message_data["video"] = message["video"]
+        elif message["type"] == "document":
+            message_data["message"] = "[Document Message]"
+            message_data["document"] = message["document"]
+        else:
+            message_data["message"] = f"[{message['type'].title()} Message]"
+            
+        return message_data
+        
+    except KeyError as e:
+        logger.error(f"Error extracting WhatsApp message data: {e}")
         raise ValueError("Invalid message format") from e

@@ -54,26 +54,6 @@ interface Templates {
   [key: string]: Template;
 }
 
-interface RequestBody {
-  phone_number: string;
-  message?: string;
-  use_template: boolean;
-  template_name: string;
-  template: {
-    name: string;
-    language: {
-      code: string;
-    };
-    components?: Array<{
-      type: string;
-      parameters: Array<{
-        type: string;
-        text: string;
-      }>;
-    }>;
-  };
-}
-
 export function MessageForm() {
   const [loading, setLoading] = useState(false);
   const [countryCode, setCountryCode] = useState("");
@@ -128,104 +108,61 @@ export function MessageForm() {
     setLoading(true);
 
     try {
-      // Clean and format the phone number
       const cleanPhoneNumber = phoneNumber.replace(/\D/g, "");
       const fullPhoneNumber = countryCode + cleanPhoneNumber;
 
-      // Enhanced validation with toasts instead of throws
       if (!cleanPhoneNumber || cleanPhoneNumber.length !== 10) {
-        toast.error("Validation Error", {
-          description: "Please enter a valid 10-digit phone number",
-        });
+        toast.error("Please enter a valid 10-digit phone number");
         return;
       }
 
       if (!selectedTemplate) {
-        toast.error("Validation Error", {
-          description: "Please select a template",
-        });
+        toast.error("Please select a template");
         return;
       }
 
       const template = templates[selectedTemplate];
+      const variables = message.split(";").map((v) => v.trim());
 
-      // Validate template parameters if required
-      if (template?.requiresMessage) {
+      // Validate number of parameters
+      if (template.variables_count > 0) {
         if (!message.trim()) {
-          toast.error("Validation Error", {
-            description: "Message parameters are required for this template",
-          });
+          toast.error(`This template requires ${template.variables_count} parameter(s)`);
           return;
         }
 
-        const variables = message.split(";").map((v) => v.trim());
-
-        // Check if we have the correct number of parameters
-        if (variables.length !== template.parameters.length) {
-          toast.error("Validation Error", {
-            description: `This template requires ${template.parameters.length} parameters. Please provide all values separated by semicolons.`,
-          });
+        if (variables.length !== template.variables_count) {
+          toast.error(
+            `This template requires exactly ${template.variables_count} parameter(s). You provided ${variables.length}.`
+          );
           return;
         }
+      }
 
-        // Validate header length if present
-        const headerParam = template.parameters.find(
-          (p) => p.type.toLowerCase() === "header"
-        );
-        if (headerParam) {
-          const headerIndex = template.parameters.indexOf(headerParam);
-          if (variables[headerIndex]?.length > 60) {
-            toast.error("Validation Error", {
-              description: "Header text cannot exceed 60 characters",
-            });
-            return;
+      // Build template components based on parameters
+      const components = template.parameters.map((param, index) => ({
+        type: param.type.toUpperCase(),
+        parameters: [
+          {
+            type: "text",
+            text: variables[index] || ""
           }
-        }
-      }
-
-      const requestBody: RequestBody = {
-        phone_number: fullPhoneNumber,
-        use_template: true,
-        template_name: selectedTemplate,
-        template: {
-          name: selectedTemplate,
-          language: {
-            code: template?.language || "en",
-          },
-        },
-      };
-
-      // Only add components if template requires parameters and has valid components
-      if (template?.requiresMessage && message.trim()) {
-        const variables = message.split(";").map((v) => v.trim());
-
-        // Map template parameters to components
-        const components = template.parameters
-          .map((param, index) => ({
-            type: param.type.toUpperCase(),
-            parameters: [
-              {
-                type: "text",
-                text: variables[index] || "",
-              },
-            ],
-          }))
-          .filter((comp) => comp.parameters[0].text);
-
-        if (components.length > 0) {
-          requestBody.template.components = components;
-        }
-      }
-
-      // Add debug logging before sending
-      console.debug("[WHATSAPP_SEND] Request body:", requestBody);
+        ]
+      }));
 
       const response = await fetch("/api/v1/whatsapp/send", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(requestBody),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          phone_number: fullPhoneNumber,
+          use_template: true,
+          template_name: selectedTemplate,
+          template: {
+            name: selectedTemplate,
+            language: { code: template.language },
+            components
+          }
+        })
       });
 
       const data = await response.json();
