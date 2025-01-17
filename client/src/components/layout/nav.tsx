@@ -24,10 +24,14 @@ export function Nav() {
   }, []);
 
   return (
-    <nav className={cn(
-      "fixed top-0 z-50 w-full transition-all duration-300",
-      scrolled ? "bg-background/80 backdrop-blur-md " : "bg-transparent"
-    )}>
+    <nav
+      className={cn(
+        "fixed top-0 z-50 w-full transition-all duration-300",
+        scrolled
+          ? "bg-background/30 backdrop-blur-md border-b"
+          : "bg-transparent"
+      )}
+    >
       <Container className="flex h-16 items-center justify-between">
         <Link href="/" className="flex items-center space-x-2">
           <Image
@@ -52,4 +56,4 @@ export function Nav() {
       </Container>
     </nav>
   );
-} 
+}

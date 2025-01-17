@@ -35,4 +35,4 @@ export function GlassPane({ className, children }: GlassPaneProps) {
       {children}
     </motion.div>
   );
-} 
+}

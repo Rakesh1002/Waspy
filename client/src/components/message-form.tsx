@@ -127,7 +127,9 @@ export function MessageForm() {
       // Validate number of parameters
       if (template.variables_count > 0) {
         if (!message.trim()) {
-          toast.error(`This template requires ${template.variables_count} parameter(s)`);
+          toast.error(
+            `This template requires ${template.variables_count} parameter(s)`
+          );
           return;
         }
 
@@ -145,9 +147,9 @@ export function MessageForm() {
         parameters: [
           {
             type: "text",
-            text: variables[index] || ""
-          }
-        ]
+            text: variables[index] || "",
+          },
+        ],
       }));
 
       const response = await fetch("/api/v1/whatsapp/send", {
@@ -160,9 +162,9 @@ export function MessageForm() {
           template: {
             name: selectedTemplate,
             language: { code: template.language },
-            components
-          }
-        })
+            components,
+          },
+        }),
       });
 
       const data = await response.json();

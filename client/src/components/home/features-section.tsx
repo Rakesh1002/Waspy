@@ -14,12 +14,14 @@ const features = [
   {
     icon: Cpu,
     title: "AI-Powered Responses",
-    description: "Leverage Advanced AI models for intelligent, context-aware conversations.",
+    description:
+      "Leverage Advanced AI models for intelligent, context-aware conversations.",
   },
   {
     icon: MessageSquare,
     title: "Knowledge Management",
-    description: "Upload documents and keep your bot's knowledge base up to date.",
+    description:
+      "Upload documents and keep your bot's knowledge base up to date.",
   },
   {
     icon: BarChart,
@@ -70,11 +72,13 @@ export function FeaturesSection() {
               <div className="absolute inset-0 -z-10 bg-gradient-to-br from-[hsl(var(--gradient-1)/0.1)] via-[hsl(var(--gradient-2)/0.1)] to-[hsl(var(--gradient-3)/0.1)] opacity-0 transition-opacity group-hover:opacity-100" />
               <feature.icon className="h-10 w-10 text-primary" />
               <h3 className="mt-4 text-xl font-bold">{feature.title}</h3>
-              <p className="mt-2 text-muted-foreground">{feature.description}</p>
+              <p className="mt-2 text-muted-foreground">
+                {feature.description}
+              </p>
             </motion.div>
           ))}
         </div>
       </motion.div>
     </section>
   );
-} 
+}

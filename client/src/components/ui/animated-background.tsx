@@ -36,9 +36,9 @@ export function AnimatedBackground() {
         <div className="absolute top-0 -left-4 w-96 h-96 bg-[hsl(var(--gradient-1))] rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-glow" />
         <div className="absolute top-0 -right-4 w-96 h-96 bg-[hsl(var(--gradient-2))] rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-glow animation-delay-2000" />
         <div className="absolute -bottom-8 left-20 w-96 h-96 bg-[hsl(var(--gradient-3))] rounded-full mix-blend-multiply filter blur-3xl opacity-20 animate-glow animation-delay-4000" />
-        
+
         {/* Subtle interactive gradient */}
-        <div 
+        <div
           className="absolute inset-0"
           style={{
             background: `radial-gradient(
@@ -46,10 +46,10 @@ export function AnimatedBackground() {
               hsl(var(--gradient-1) / 0.1),
               hsl(var(--gradient-2) / 0.1),
               hsl(var(--gradient-3) / 0.1)
-            )`
+            )`,
           }}
         />
       </motion.div>
     </div>
   );
-} 
+}

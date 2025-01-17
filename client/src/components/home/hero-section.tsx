@@ -35,14 +35,6 @@ export function HeroSection({ isAuthenticated }: { isAuthenticated: boolean }) {
       animate="show"
       className="container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative flex min-h-[calc(100vh-4rem)] flex-col items-center justify-center gap-8 py-20 text-center"
     >
-      {/* Enhanced Background Effects */}
-      <div className="absolute inset-0 -z-10">
-        {/* Subtle base gradient */}
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--primary)/0.05,_transparent_70%)]" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--primary)/0.03,_transparent_70%)]" />
-      
-      </div>
-
       {/* Hero Content */}
       <motion.div variants={fadeIn} className="space-y-8 max-w-4xl relative">
         {/* Top Badge */}
@@ -77,7 +69,7 @@ export function HeroSection({ isAuthenticated }: { isAuthenticated: boolean }) {
 
         {/* Description */}
         <p className="mx-auto max-w-[42rem] text-slate-600 dark:text-slate-400 text-xl leading-relaxed">
-          Build, deploy, and scale AI-powered WhatsApp bots with our enterprise
+          Build, deploy, and scale custom WhatsApp AI agents with our enterprise
           platform. No coding required.
         </p>
 
@@ -95,7 +87,7 @@ export function HeroSection({ isAuthenticated }: { isAuthenticated: boolean }) {
               <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
             </Button>
           </Link>
-          <Link href="/docs">
+          <Link href="/#">
             <Button
               variant="outline"
               size="lg"
@@ -108,4 +100,4 @@ export function HeroSection({ isAuthenticated }: { isAuthenticated: boolean }) {
       </motion.div>
     </motion.section>
   );
-} 
+}

@@ -25,12 +25,12 @@ export function StatsSection() {
       >
         <div className="grid gap-8 text-center md:grid-cols-4">
           {stats.map((stat, i) => (
-            <motion.div 
-              key={i} 
-              variants={fadeIn} 
+            <motion.div
+              key={i}
+              variants={fadeIn}
               className="group space-y-2 p-6 rounded-xl transition-all duration-300 hover:bg-background/60 hover:backdrop-blur-sm"
             >
-              <h4 className="text-5xl font-bold tracking-tight gradient-text">
+              <h4 className="text-5xl font-bold tracking-tight text-primary">
                 {stat.value}
               </h4>
               <p className="text-sm text-muted-foreground">{stat.label}</p>
@@ -40,4 +40,4 @@ export function StatsSection() {
       </motion.div>
     </section>
   );
-} 
+}

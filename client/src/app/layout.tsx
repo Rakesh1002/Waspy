@@ -57,9 +57,7 @@ export const metadata: Metadata = {
     creator: "@waspyai",
   },
   icons: {
-    icon: [
-      { url: "/favicon.svg", type: "image/svg+xml" },
-    ],
+    icon: [{ url: "/favicon.svg", type: "image/svg+xml" }],
     apple: [{ url: "/apple-touch-icon.png", sizes: "180x180" }],
   },
   manifest: "/site.webmanifest",

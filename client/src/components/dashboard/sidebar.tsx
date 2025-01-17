@@ -18,4 +18,4 @@ export function Sidebar() {
       {/* Rest of sidebar content... */}
     </div>
   );
-} 
+}

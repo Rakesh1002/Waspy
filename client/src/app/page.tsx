@@ -6,6 +6,7 @@ import { Nav } from "@/components/layout/nav";
 import { AnimatedBackground } from "@/components/ui/animated-background";
 import { auth } from "@/auth";
 import { Footer } from "@/components/layout/footer";
+import { ContactForm } from "@/components/home/contact-form";
 
 export default async function Home() {
   const session = await auth();
@@ -16,12 +17,21 @@ export default async function Home() {
       <Nav />
       <main className="flex-1 pt-16">
         <HeroSection isAuthenticated={!!session} />
-        <div className="relative space-y-1">
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background to-background" />
-          <FeaturesSection />
-          <CaseStudiesSection />
-          <StatsSection />
+        <div className="relative">
+          <div className="absolute inset-0 bg-gradient-to-b from-primary/10 via-primary/20 to-primary/10" />
+          <section id="features" className="relative">
+            <FeaturesSection />
+          </section>
+          <section id="case-studies" className="relative">
+            <CaseStudiesSection />
+          </section>
+          <section id="stats" className="relative">
+            <StatsSection />
+          </section>
         </div>
+        <section id="contact" className="relative">
+          <ContactForm />
+        </section>
       </main>
       <Footer />
     </div>
