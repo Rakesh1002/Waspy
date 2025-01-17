@@ -40,7 +40,10 @@ const features = [
 
 export function FeaturesSection() {
   return (
-    <section className="border-t bg-muted/50">
+    <section className="relative bg-gradient-to-b from-background via-background/50 to-background/90">
+      <div className="absolute inset-0 -z-10">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_var(--gradient-1)/0.1,_transparent_50%)]" />
+      </div>
       <motion.div
         variants={staggerContainer}
         initial="hidden"
@@ -62,9 +65,9 @@ export function FeaturesSection() {
             <motion.div
               key={i}
               variants={fadeIn}
-              className="group relative overflow-hidden rounded-2xl border bg-background/50 p-6 backdrop-blur-sm transition-colors hover:bg-accent/50"
+              className="group relative overflow-hidden rounded-2xl border bg-background/40 p-6 backdrop-blur-sm transition-all duration-300 hover:bg-background/60 hover:shadow-lg hover:-translate-y-1"
             >
-              <div className="absolute inset-0 -z-10 bg-gradient-to-br from-purple-500/10 via-blue-500/10 to-teal-500/10 opacity-0 transition-opacity group-hover:opacity-100" />
+              <div className="absolute inset-0 -z-10 bg-gradient-to-br from-[hsl(var(--gradient-1)/0.1)] via-[hsl(var(--gradient-2)/0.1)] to-[hsl(var(--gradient-3)/0.1)] opacity-0 transition-opacity group-hover:opacity-100" />
               <feature.icon className="h-10 w-10 text-primary" />
               <h3 className="mt-4 text-xl font-bold">{feature.title}</h3>
               <p className="mt-2 text-muted-foreground">{feature.description}</p>

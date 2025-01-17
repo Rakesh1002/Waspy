@@ -6,6 +6,7 @@ import { ArrowRight, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { fadeIn, staggerContainer } from "@/lib/animations";
 import { useEffect, useState } from "react";
+import { GlassPane } from "@/components/ui/glass-pane";
 
 const words = [
   "Support",
@@ -24,7 +25,6 @@ export function HeroSection({ isAuthenticated }: { isAuthenticated: boolean }) {
     const interval = setInterval(() => {
       setCurrentWordIndex((prev) => (prev + 1) % words.length);
     }, 2000);
-
     return () => clearInterval(interval);
   }, []);
 
@@ -35,21 +35,27 @@ export function HeroSection({ isAuthenticated }: { isAuthenticated: boolean }) {
       animate="show"
       className="container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative flex min-h-[calc(100vh-4rem)] flex-col items-center justify-center gap-8 py-20 text-center"
     >
-      {/* Background Effects */}
+      {/* Enhanced Background Effects */}
       <div className="absolute inset-0 -z-10">
-        <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 via-blue-500/10 to-teal-500/10 blur-3xl" />
-        <div className="absolute right-0 top-0 -z-10 h-64 w-64 rounded-full bg-purple-500/20 blur-3xl" />
-        <div className="absolute left-0 bottom-0 -z-10 h-64 w-64 rounded-full bg-blue-500/20 blur-3xl" />
+        {/* Subtle base gradient */}
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--primary)/0.05,_transparent_70%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--primary)/0.03,_transparent_70%)]" />
+      
       </div>
 
       {/* Hero Content */}
-      <motion.div variants={fadeIn} className="space-y-6 max-w-4xl">
-        <span className="inline-flex items-center rounded-full bg-muted px-3 py-1 text-sm">
-          <Sparkles className="mr-2 h-3.5 w-3.5" />
-          Create Whatsapp AI agents in minutes
-        </span>
-        <h1 className="text-4xl font-bold tracking-tighter sm:text-6xl md:text-7xl lg:text-8xl flex flex-col items-center gap-2">
-          <span>WhatsApp</span>
+      <motion.div variants={fadeIn} className="space-y-8 max-w-4xl relative">
+        {/* Top Badge */}
+        <GlassPane className="inline-flex px-6 py-3 mx-auto">
+          <span className="inline-flex items-center text-sm font-medium text-blue-700 dark:text-blue-400">
+            <Sparkles className="mr-2 h-4 w-4 text-blue-500" />
+            Create Whatsapp AI agents in minutes
+          </span>
+        </GlassPane>
+
+        {/* Main Title */}
+        <h1 className="text-4xl font-bold tracking-tight sm:text-6xl md:text-7xl lg:text-8xl flex flex-col items-center gap-4">
+          <span className="text-slate-800 dark:text-slate-200">WhatsApp</span>
           <span className="relative inline-flex h-[1.1em] overflow-hidden">
             <AnimatePresence mode="wait">
               <motion.span
@@ -58,34 +64,43 @@ export function HeroSection({ isAuthenticated }: { isAuthenticated: boolean }) {
                 animate={{ y: 0, opacity: 1 }}
                 exit={{ y: -50, opacity: 0 }}
                 transition={{ duration: 0.3, ease: "easeOut" }}
+                className="text-blue-600/80 dark:text-blue-400/90"
               >
                 {words[currentWordIndex]}
               </motion.span>
             </AnimatePresence>
           </span>
-          <span className="bg-gradient-to-r from-purple-500 via-blue-500 to-teal-500 bg-clip-text text-transparent leading-[1.3] pb-2">
+          <span className="bg-gradient-to-r from-blue-600 via-blue-500 to-sky-400 bg-clip-text text-transparent font-extrabold leading-[1.2]">
             Made Intelligent
           </span>
         </h1>
-        <p className="mx-auto max-w-[42rem] text-muted-foreground sm:text-xl">
+
+        {/* Description */}
+        <p className="mx-auto max-w-[42rem] text-slate-600 dark:text-slate-400 text-xl leading-relaxed">
           Build, deploy, and scale AI-powered WhatsApp bots with our enterprise
           platform. No coding required.
         </p>
+
+        {/* CTA Buttons */}
         <motion.div
           variants={fadeIn}
-          className="flex flex-col gap-4 sm:flex-row justify-center"
+          className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-4"
         >
           <Link href={isAuthenticated ? "/dashboard" : "/sign-in"}>
             <Button
               size="lg"
-              className="group bg-gradient-to-r from-purple-500 via-blue-500 to-teal-500"
+              className="h-12 px-8 text-base font-medium bg-blue-600 hover:bg-blue-700 transition-colors group text-white"
             >
               {isAuthenticated ? "Go to Dashboard" : "Get Started Free"}
-              <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+              <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
             </Button>
           </Link>
           <Link href="/docs">
-            <Button variant="outline" size="lg">
+            <Button
+              variant="outline"
+              size="lg"
+              className="h-12 px-8 text-base font-medium border-blue-200 dark:border-blue-900 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+            >
               View Documentation
             </Button>
           </Link>
