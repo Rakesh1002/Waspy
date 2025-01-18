@@ -7,11 +7,13 @@ export const metadata: Metadata = {
   description: "Edit WhatsApp message template",
 };
 
-export default function EditTemplatePage({
-  params,
-}: {
-  params: { template_name: string };
-}) {
+interface PageProps {
+  params: Promise<{ template_name: string }>;
+}
+
+export default async function EditTemplatePage({ params }: PageProps) {
+  const { template_name } = await params;
+  
   return (
     <div className="flex min-h-screen flex-col">
       <main className="flex-1">
@@ -28,11 +30,11 @@ export default function EditTemplatePage({
               <CardTitle>Template Details</CardTitle>
             </CardHeader>
             <CardContent>
-              <EditTemplateForm templateName={params.template_name} />
+              <EditTemplateForm templateName={template_name} />
             </CardContent>
           </Card>
         </div>
       </main>
     </div>
   );
-} 
+}

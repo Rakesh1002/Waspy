@@ -20,7 +20,9 @@ export default async function TemplateViewPage({ params }: PageProps) {
       <main className="flex-1">
         <div className="mx-auto max-w-4xl space-y-4 p-4 lg:p-8 lg:pt-6">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight">Template Details</h1>
+            <h1 className="text-2xl font-bold tracking-tight">
+              Template Details
+            </h1>
             <p className="text-muted-foreground">
               View and manage your WhatsApp message template.
             </p>
@@ -38,4 +40,4 @@ export default async function TemplateViewPage({ params }: PageProps) {
       </main>
     </div>
   );
-} 
+}

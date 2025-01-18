@@ -26,7 +26,7 @@ export default {
     },
     async redirect({ url, baseUrl }) {
       // After sign in, force redirect to dashboard
-      if (url.includes('callback') && url.includes('google')) {
+      if (url.includes("callback") && url.includes("google")) {
         return `${baseUrl}/dashboard`;
       }
 

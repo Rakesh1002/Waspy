@@ -28,20 +28,24 @@ import { Skeleton } from "@/components/ui/skeleton";
 const templateSchema = z.object({
   category: z.enum(["MARKETING", "UTILITY", "AUTHENTICATION"]),
   language: z.string().min(2, "Language code is required"),
-  header: z.object({
-    format: z.enum(["TEXT", "IMAGE", "VIDEO", "DOCUMENT"]),
-    text: z.string().optional(),
-  }).optional(),
+  header: z
+    .object({
+      format: z.enum(["TEXT", "IMAGE", "VIDEO", "DOCUMENT"]),
+      text: z.string().optional(),
+    })
+    .optional(),
   body: z.string().min(1, "Message body is required"),
   footer: z.string().optional(),
-  buttons: z.array(
-    z.object({
-      type: z.enum(["URL", "PHONE_NUMBER", "QUICK_REPLY"]),
-      text: z.string(),
-      url: z.string().optional(),
-      phone_number: z.string().optional(),
-    })
-  ).optional(),
+  buttons: z
+    .array(
+      z.object({
+        type: z.enum(["URL", "PHONE_NUMBER", "QUICK_REPLY"]),
+        text: z.string(),
+        url: z.string().optional(),
+        phone_number: z.string().optional(),
+      })
+    )
+    .optional(),
 });
 
 type TemplateFormValues = z.infer<typeof templateSchema>;
@@ -61,10 +65,12 @@ export function EditTemplateForm({ templateName }: EditTemplateFormProps) {
 
   const fetchTemplateDetails = useCallback(async () => {
     try {
-      const response = await fetch(`/api/v1/whatsapp/templates/${templateName}`);
+      const response = await fetch(
+        `/api/v1/whatsapp/templates/${templateName}`
+      );
       if (!response.ok) throw new Error("Failed to fetch template details");
       const data = await response.json();
-      
+
       // Set form values from template data
       form.reset({
         category: data.category,
@@ -85,11 +91,14 @@ export function EditTemplateForm({ templateName }: EditTemplateFormProps) {
   async function onSubmit(data: TemplateFormValues) {
     setIsSubmitting(true);
     try {
-      const response = await fetch(`/api/v1/whatsapp/templates/${templateName}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
+      const response = await fetch(
+        `/api/v1/whatsapp/templates/${templateName}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        }
+      );
 
       if (!response.ok) {
         const errorData = await response.json();
@@ -99,7 +108,9 @@ export function EditTemplateForm({ templateName }: EditTemplateFormProps) {
       toast.success("Template updated successfully");
       router.push(`/dashboard/templates/${templateName}`);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Failed to update template");
+      toast.error(
+        error instanceof Error ? error.message : "Failed to update template"
+      );
       console.error(error);
     } finally {
       setIsSubmitting(false);
@@ -154,4 +165,4 @@ export function EditTemplateForm({ templateName }: EditTemplateFormProps) {
       </form>
     </Form>
   );
-} 
+}

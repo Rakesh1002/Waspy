@@ -1,6 +1,11 @@
 "use client";
 
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
@@ -60,9 +65,14 @@ interface CampaignDetails {
   error_count: number;
 }
 
-export function CampaignDetailsDialog({ campaignId, open, onOpenChange }: CampaignDetailsProps) {
+export function CampaignDetailsDialog({
+  campaignId,
+  open,
+  onOpenChange,
+}: CampaignDetailsProps) {
   const [details, setDetails] = useState<CampaignDetails | null>(null);
-  const [templateContent, setTemplateContent] = useState<TemplateContent | null>(null);
+  const [templateContent, setTemplateContent] =
+    useState<TemplateContent | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -71,11 +81,11 @@ export function CampaignDetailsDialog({ campaignId, open, onOpenChange }: Campai
       setLoading(true);
       setError(null);
       const response = await fetch(`/api/v1/campaigns/${campaignId}`, {
-        credentials: 'include',
+        credentials: "include",
       });
 
       if (!response.ok) {
-        throw new Error('Failed to fetch campaign details');
+        throw new Error("Failed to fetch campaign details");
       }
 
       const data = await response.json();
@@ -85,8 +95,8 @@ export function CampaignDetailsDialog({ campaignId, open, onOpenChange }: Campai
         await fetchTemplateContent(data.template_name);
       }
     } catch (error) {
-      console.error('Error fetching campaign details:', error);
-      setError('Failed to load campaign details');
+      console.error("Error fetching campaign details:", error);
+      setError("Failed to load campaign details");
     } finally {
       setLoading(false);
     }
@@ -101,75 +111,75 @@ export function CampaignDetailsDialog({ campaignId, open, onOpenChange }: Campai
   const fetchTemplateContent = async (templateName: string) => {
     try {
       const response = await fetch(
-        `/api/v1/whatsapp/template-content?phone_number_id=602154019636453&template_name=${templateName}`, 
+        `/api/v1/whatsapp/template-content?phone_number_id=602154019636453&template_name=${templateName}`,
         {
-          credentials: 'include',
+          credentials: "include",
         }
       );
 
       if (!response.ok) {
-        throw new Error('Failed to fetch template content');
+        throw new Error("Failed to fetch template content");
       }
 
       const data = await response.json();
-      
+
       // Transform the data to match our TemplateContent interface
       const transformedData: TemplateContent = {
         name: data.name,
         language: data.language,
         status: data.status,
-        category: data.category || 'UTILITY',
-        components: []
+        category: data.category || "UTILITY",
+        components: [],
       };
 
       // Map the raw components from the API
       if (data.content) {
         if (data.content.header) {
           transformedData.components.push({
-            type: 'HEADER',
+            type: "HEADER",
             text: data.content.header.text,
-            format: data.content.header.format
+            format: data.content.header.format,
           });
         }
 
         if (data.content.body) {
           transformedData.components.push({
-            type: 'BODY',
+            type: "BODY",
             text: data.content.body,
             example: {
-              body_text: [Object.values(data.template_content.raw || {})]
-            }
+              body_text: [Object.values(data.template_content.raw || {})],
+            },
           });
         }
 
         if (data.content.buttons) {
           transformedData.components.push({
-            type: 'BUTTONS',
-            buttons: data.content.buttons
+            type: "BUTTONS",
+            buttons: data.content.buttons,
           });
         }
       }
 
-      console.log('Transformed template content:', transformedData);
+      console.log("Transformed template content:", transformedData);
       setTemplateContent(transformedData);
     } catch (error) {
-      console.error('Error fetching template content:', error);
+      console.error("Error fetching template content:", error);
     }
   };
 
   const formatDateTime = (dateString: string) => {
-    if (!dateString) return 'N/A';
+    if (!dateString) return "N/A";
     const date = new Date(dateString);
     return date.toLocaleString();
   };
 
   const getStatusIcon = (status: string) => {
     switch (status.toLowerCase()) {
-      case 'read':
+      case "read":
         return <CheckCircle2 className="h-4 w-4 text-blue-500" />;
-      case 'delivered':
+      case "delivered":
         return <CheckCircle2 className="h-4 w-4 text-green-500" />;
-      case 'sent':
+      case "sent":
         return <Circle className="h-4 w-4 text-gray-500" />;
       default:
         return <Circle className="h-4 w-4 text-gray-300" />;
@@ -178,11 +188,11 @@ export function CampaignDetailsDialog({ campaignId, open, onOpenChange }: Campai
 
   const renderTemplateContent = () => {
     if (!templateContent) {
-      console.log('No template content available');
+      console.log("No template content available");
       return null;
     }
 
-    console.log('Rendering template content:', templateContent);
+    console.log("Rendering template content:", templateContent);
 
     return (
       <div className="space-y-4">
@@ -195,18 +205,20 @@ export function CampaignDetailsDialog({ campaignId, open, onOpenChange }: Campai
 
         <div className="space-y-4">
           {templateContent.components.map((component, index) => {
-            console.log('Rendering component:', component);
+            console.log("Rendering component:", component);
             switch (component.type.toUpperCase()) {
-              case 'HEADER':
+              case "HEADER":
                 return (
                   <div key={index} className="space-y-1">
                     <h4 className="text-sm font-medium">Header</h4>
                     <div className="bg-muted p-2 rounded">
-                      {component.format === 'TEXT' ? component.text : `[${component.format}]`}
+                      {component.format === "TEXT"
+                        ? component.text
+                        : `[${component.format}]`}
                     </div>
                   </div>
                 );
-              case 'BODY':
+              case "BODY":
                 return (
                   <div key={index} className="space-y-1">
                     <h4 className="text-sm font-medium">Body</h4>
@@ -215,20 +227,26 @@ export function CampaignDetailsDialog({ campaignId, open, onOpenChange }: Campai
                     </div>
                     {component.example?.body_text && (
                       <div className="text-sm text-muted-foreground mt-1">
-                        Example values: {component.example.body_text[0].join(', ')}
+                        Example values:{" "}
+                        {component.example.body_text[0].join(", ")}
                       </div>
                     )}
                   </div>
                 );
-              case 'BUTTONS':
+              case "BUTTONS":
                 return (
                   <div key={index} className="space-y-2">
                     <h4 className="text-sm font-medium">Buttons</h4>
                     <div className="space-y-1">
                       {component.buttons?.map((button, buttonIndex) => (
-                        <div key={buttonIndex} className="bg-muted p-2 rounded flex justify-between">
+                        <div
+                          key={buttonIndex}
+                          className="bg-muted p-2 rounded flex justify-between"
+                        >
                           <span>{button.text}</span>
-                          <span className="text-muted-foreground text-sm">{button.type}</span>
+                          <span className="text-muted-foreground text-sm">
+                            {button.type}
+                          </span>
                         </div>
                       ))}
                     </div>
@@ -247,11 +265,13 @@ export function CampaignDetailsDialog({ campaignId, open, onOpenChange }: Campai
               <div className="text-sm font-medium">Variables Used:</div>
               {details.template_content.raw && (
                 <div className="text-sm text-muted-foreground">
-                  {Object.entries(details.template_content.raw).map(([key, value]) => (
-                    <div key={key}>
-                      {key}: {String(value)}
-                    </div>
-                  ))}
+                  {Object.entries(details.template_content.raw).map(
+                    ([key, value]) => (
+                      <div key={key}>
+                        {key}: {String(value)}
+                      </div>
+                    )
+                  )}
                 </div>
               )}
               <div className="mt-4 pt-4 border-t">
@@ -293,14 +313,20 @@ export function CampaignDetailsDialog({ campaignId, open, onOpenChange }: Campai
                 <div className="grid gap-4">
                   <div className="flex justify-between items-center">
                     <h3 className="text-lg font-medium">{details.name}</h3>
-                    <Badge variant={details.status === "completed" ? "default" : "secondary"}>
+                    <Badge
+                      variant={
+                        details.status === "completed" ? "default" : "secondary"
+                      }
+                    >
                       {details.status}
                     </Badge>
                   </div>
                   <div className="text-sm text-muted-foreground">
                     Created: {formatDateTime(details.created_at)}
                     {details.completed_at && (
-                      <div>Completed: {formatDateTime(details.completed_at)}</div>
+                      <div>
+                        Completed: {formatDateTime(details.completed_at)}
+                      </div>
                     )}
                   </div>
                   {renderTemplateContent()}
@@ -309,13 +335,17 @@ export function CampaignDetailsDialog({ campaignId, open, onOpenChange }: Campai
 
               <TabsContent value="recipients" className="space-y-4">
                 <div className="space-y-2">
-                  <h3 className="font-medium">Recipients ({details.recipients.length})</h3>
+                  <h3 className="font-medium">
+                    Recipients ({details.recipients.length})
+                  </h3>
                   <div className="space-y-2">
                     {details.recipients.map((recipient, index) => (
-                      <div key={index} className="flex items-center gap-2 p-2 bg-muted rounded-lg">
+                      <div
+                        key={index}
+                        className="flex items-center gap-2 p-2 bg-muted rounded-lg"
+                      >
                         <MessageSquare className="h-4 w-4" />
                         <span>{recipient}</span>
-                       
                       </div>
                     ))}
                   </div>
@@ -339,7 +369,9 @@ export function CampaignDetailsDialog({ campaignId, open, onOpenChange }: Campai
                     </div>
                     <div className="bg-muted p-4 rounded-lg">
                       <h3 className="font-medium mb-1">Errors</h3>
-                      <p className="text-2xl text-red-500">{details.error_count}</p>
+                      <p className="text-2xl text-red-500">
+                        {details.error_count}
+                      </p>
                     </div>
                   </div>
 
@@ -347,10 +379,13 @@ export function CampaignDetailsDialog({ campaignId, open, onOpenChange }: Campai
                     <h3 className="font-medium">Message Status</h3>
                     <div className="flex items-center gap-2 p-2 bg-muted rounded-lg">
                       {getStatusIcon(details.metrics.status)}
-                      <span className="capitalize">{details.metrics.status}</span>
+                      <span className="capitalize">
+                        {details.metrics.status}
+                      </span>
                       {details.metrics.last_status_update && (
                         <span className="text-sm text-muted-foreground ml-auto">
-                          Updated: {formatDateTime(details.metrics.last_status_update)}
+                          Updated:{" "}
+                          {formatDateTime(details.metrics.last_status_update)}
                         </span>
                       )}
                     </div>
@@ -360,9 +395,14 @@ export function CampaignDetailsDialog({ campaignId, open, onOpenChange }: Campai
                     <div className="space-y-2">
                       <h3 className="font-medium">Button Interactions</h3>
                       {details.metrics.clicked.map((click, index) => (
-                        <div key={index} className="flex justify-between p-2 bg-muted rounded-lg">
+                        <div
+                          key={index}
+                          className="flex justify-between p-2 bg-muted rounded-lg"
+                        >
                           <span>{click.button_content}</span>
-                          <span className="font-medium">{click.count} clicks</span>
+                          <span className="font-medium">
+                            {click.count} clicks
+                          </span>
                         </div>
                       ))}
                     </div>
@@ -379,4 +419,4 @@ export function CampaignDetailsDialog({ campaignId, open, onOpenChange }: Campai
       </DialogContent>
     </Dialog>
   );
-} 
+}

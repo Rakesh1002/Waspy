@@ -1,6 +1,11 @@
-import { Handle, Position } from 'reactflow';
+import { Handle, Position } from "reactflow";
 import { Card } from "@/components/ui/card";
-import { MessageSquare, ArrowRight, AlertCircle, FileQuestion } from "lucide-react";
+import {
+  MessageSquare,
+  ArrowRight,
+  AlertCircle,
+  FileQuestion,
+} from "lucide-react";
 
 const nodeIcons = {
   message: MessageSquare,
@@ -40,7 +45,7 @@ export function FlowNode({ data }: FlowNodeProps) {
         position={Position.Top}
         className={`w-3 h-3 transition-all opacity-0 group-hover:opacity-100 ${handleStyles[data.type]}`}
       />
-      <Card 
+      <Card
         className={`
           p-4 border-2 ${nodeColors[data.type]} min-w-[200px]
           transition-all duration-200
@@ -51,7 +56,9 @@ export function FlowNode({ data }: FlowNodeProps) {
       >
         <div className="flex items-center gap-2">
           <Icon className="h-5 w-5" />
-          <span className="font-medium capitalize">{data.label || data.type}</span>
+          <span className="font-medium capitalize">
+            {data.label || data.type}
+          </span>
         </div>
       </Card>
       <Handle
@@ -61,4 +68,4 @@ export function FlowNode({ data }: FlowNodeProps) {
       />
     </div>
   );
-} 
+}

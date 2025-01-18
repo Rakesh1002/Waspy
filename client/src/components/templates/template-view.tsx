@@ -47,7 +47,7 @@ export function TemplateView({ templateName }: TemplateViewProps) {
 
       if (!response.ok) throw new Error("Failed to fetch template details");
       const { success, template } = await response.json();
-      
+
       if (!success || !template) {
         throw new Error("Template not found");
       }
@@ -66,12 +66,16 @@ export function TemplateView({ templateName }: TemplateViewProps) {
   }, [fetchTemplateDetails]);
 
   async function handleDelete() {
-    if (!window.confirm("Are you sure you want to delete this template?")) return;
+    if (!window.confirm("Are you sure you want to delete this template?"))
+      return;
 
     try {
-      const response = await fetch(`/api/v1/whatsapp/templates/${templateName}`, {
-        method: "DELETE",
-      });
+      const response = await fetch(
+        `/api/v1/whatsapp/templates/${templateName}`,
+        {
+          method: "DELETE",
+        }
+      );
 
       if (!response.ok) {
         const data = await response.json();
@@ -81,7 +85,9 @@ export function TemplateView({ templateName }: TemplateViewProps) {
       toast.success("Template deleted successfully");
       router.push("/dashboard/templates");
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Failed to delete template");
+      toast.error(
+        error instanceof Error ? error.message : "Failed to delete template"
+      );
       console.error(error);
     }
   }
@@ -102,7 +108,9 @@ export function TemplateView({ templateName }: TemplateViewProps) {
           <div className="flex gap-2 mt-2">
             {template.category && <Badge>{template.category}</Badge>}
             <Badge variant="outline">{template.language}</Badge>
-            <Badge variant={template.status === "APPROVED" ? "success" : "secondary"}>
+            <Badge
+              variant={template.status === "APPROVED" ? "success" : "secondary"}
+            >
               {template.status}
             </Badge>
           </div>
@@ -110,7 +118,9 @@ export function TemplateView({ templateName }: TemplateViewProps) {
         <div className="flex gap-2">
           <Button
             variant="outline"
-            onClick={() => router.push(`/dashboard/templates/${templateName}/edit`)}
+            onClick={() =>
+              router.push(`/dashboard/templates/${templateName}/edit`)
+            }
           >
             <Edit className="h-4 w-4 mr-2" />
             Edit
@@ -126,7 +136,9 @@ export function TemplateView({ templateName }: TemplateViewProps) {
         {template?.content.header && (
           <div className="border rounded-lg p-4">
             <h3 className="font-medium mb-2">HEADER</h3>
-            <p className="text-muted-foreground">{template.content.header.text}</p>
+            <p className="text-muted-foreground">
+              {template.content.header.text}
+            </p>
           </div>
         )}
         {template?.content.body && (
@@ -156,4 +168,4 @@ export function TemplateView({ templateName }: TemplateViewProps) {
       </div>
     </div>
   );
-} 
+}

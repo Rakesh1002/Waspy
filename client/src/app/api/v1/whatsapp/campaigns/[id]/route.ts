@@ -3,11 +3,10 @@ import { getToken } from "next-auth/jwt";
 
 export async function DELETE(
   request: NextRequest,
-  context: { params: Promise<{ id: string }> | { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    // Await the params
-    const { id: campaignId } = await context.params;
+    const { id: campaignId } = await params;
 
     const token = await getToken({
       req: request,
@@ -26,13 +25,16 @@ export async function DELETE(
       throw new Error("API_URL not configured");
     }
 
-    const response = await fetch(`${apiUrl}/api/v1/whatsapp/campaigns/${campaignId}`, {
-      method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${token.access_token}`,
-        "Content-Type": "application/json",
+    const response = await fetch(
+      `${apiUrl}/api/v1/whatsapp/campaigns/${campaignId}`,
+      {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token.access_token}`,
+          "Content-Type": "application/json",
+        },
       }
-    });
+    );
 
     if (!response.ok) {
       const data = await response.json();
@@ -54,11 +56,10 @@ export async function DELETE(
 
 export async function GET(
   request: NextRequest,
-  context: { params: Promise<{ id: string }> | { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    // Await the params
-    const { id: campaignId } = await context.params;
+    const { id: campaignId } = await params;
 
     const token = await getToken({
       req: request,
@@ -77,19 +78,25 @@ export async function GET(
       throw new Error("API_URL not configured");
     }
 
-    const response = await fetch(`${apiUrl}/api/v1/whatsapp/campaigns/${campaignId}`, {
-      headers: {
-        Authorization: `Bearer ${token.access_token}`,
-        "Content-Type": "application/json",
-      },
-      next: { revalidate: 0 } // Disable caching
-    });
+    const response = await fetch(
+      `${apiUrl}/api/v1/whatsapp/campaigns/${campaignId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token.access_token}`,
+          "Content-Type": "application/json",
+        },
+        next: { revalidate: 0 }, // Disable caching
+      }
+    );
 
     const data = await response.json();
 
     if (!response.ok) {
       return Response.json(
-        { success: false, error: data.detail || "Failed to fetch campaign details" },
+        {
+          success: false,
+          error: data.detail || "Failed to fetch campaign details",
+        },
         { status: response.status }
       );
     }
@@ -102,4 +109,4 @@ export async function GET(
       { status: 500 }
     );
   }
-} 
+}

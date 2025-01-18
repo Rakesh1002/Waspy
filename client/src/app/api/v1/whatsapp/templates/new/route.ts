@@ -22,26 +22,38 @@ export async function POST(request: NextRequest) {
       ...body,
       components: [
         // Header component if provided
-        ...(body.header ? [{
-          type: "HEADER",
-          format: body.header.format,
-          text: body.header.text,
-        }] : []),
+        ...(body.header
+          ? [
+              {
+                type: "HEADER",
+                format: body.header.format,
+                text: body.header.text,
+              },
+            ]
+          : []),
         // Body component is required
         {
           type: "BODY",
           text: body.body,
         },
         // Footer component if provided
-        ...(body.footer ? [{
-          type: "FOOTER",
-          text: body.footer,
-        }] : []),
+        ...(body.footer
+          ? [
+              {
+                type: "FOOTER",
+                text: body.footer,
+              },
+            ]
+          : []),
         // Buttons component if provided
-        ...(body.buttons && body.buttons.length > 0 ? [{
-          type: "BUTTONS",
-          buttons: body.buttons,
-        }] : []),
+        ...(body.buttons && body.buttons.length > 0
+          ? [
+              {
+                type: "BUTTONS",
+                buttons: body.buttons,
+              },
+            ]
+          : []),
       ],
     };
 
@@ -74,4 +86,4 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
-} 
+}

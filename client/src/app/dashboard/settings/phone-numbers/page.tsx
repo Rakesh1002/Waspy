@@ -5,7 +5,14 @@ import { Button } from "@/components/ui/button";
 import { RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import { PhoneNumberList } from "@/components/settings/phone-number-list";
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 
@@ -17,7 +24,6 @@ interface PhoneNumber {
   code_verification_status?: string;
   whatsapp_registered: boolean;
 }
-
 
 export default function PhoneNumbersPage() {
   const [loading, setLoading] = useState(true);
@@ -114,20 +120,19 @@ export default function PhoneNumbersPage() {
             </Button>
           </div>
         </div>
-      
-      
+
         <div className="mx-auto max-w-6xl space-y-4 p-4 lg:p-8 lg:pt-6">
-        {loading ? (
-          <div className="flex items-center justify-center p-8">
-            <RefreshCw className="h-6 w-6 animate-spin" />
-          </div>
-        ) : (
-          <PhoneNumberList
-            phoneNumbers={phoneNumbers}
-            onUpdate={fetchPhoneNumbers}
-          />
-        )}
-      </div>
+          {loading ? (
+            <div className="flex items-center justify-center p-8">
+              <RefreshCw className="h-6 w-6 animate-spin" />
+            </div>
+          ) : (
+            <PhoneNumberList
+              phoneNumbers={phoneNumbers}
+              onUpdate={fetchPhoneNumbers}
+            />
+          )}
+        </div>
       </main>
     </div>
   );

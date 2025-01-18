@@ -259,13 +259,15 @@ export function MessageForm({ onSuccess }: MessageFormProps) {
           name: selectedTemplate,
           language: { code: templateContent?.language || "en_US" },
           components: templateContent?.content?.body?.includes("{{")
-            ? [{
-                type: "BODY",
-                parameters: templateVariables.map((variable) => ({
-                  type: "text",
-                  text: variable.value || `[Variable ${variable.index}]`,
-                }))
-              }]
+            ? [
+                {
+                  type: "BODY",
+                  parameters: templateVariables.map((variable) => ({
+                    type: "text",
+                    text: variable.value || `[Variable ${variable.index}]`,
+                  })),
+                },
+              ]
             : [], // Empty array for templates without variables
         },
       };

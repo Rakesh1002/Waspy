@@ -40,11 +40,11 @@ export function NavUser({
 }) {
   const { isMobile } = useSidebar();
   const { theme, setTheme } = useTheme();
-  
+
   const handleLogout = async () => {
     await signOut({
       callbackUrl: "/",
-      redirect: true
+      redirect: true,
     });
   };
 

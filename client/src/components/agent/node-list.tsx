@@ -19,13 +19,9 @@ export function NodeList() {
       <h2 className="text-lg font-semibold mb-4">Available Nodes</h2>
       <div ref={setNodeRef} className="space-y-2">
         {availableNodes.map((node) => (
-          <AgentNode
-            key={node.id}
-            id={node.id}
-            type={node.type}
-          />
+          <AgentNode key={node.id} id={node.id} type={node.type} />
         ))}
       </div>
     </Card>
   );
-} 
+}

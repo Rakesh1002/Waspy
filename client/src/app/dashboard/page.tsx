@@ -103,13 +103,20 @@ export default function Page() {
                   <div className="mt-4 text-3xl font-bold">
                     {statsData.stats.active_campaigns ?? 0}
                   </div>
-                  <p className={`text-sm ${(statsData.stats.active_campaigns_change ?? 0) >= 0 ? "text-green-600" : "text-red-600"}`}>
-                    {(statsData.stats.active_campaigns_change ?? 0) > 0 ? "+" : ""}
-                    {statsData.stats.active_campaigns_change ?? 0}% from last month
+                  <p
+                    className={`text-sm ${(statsData.stats.active_campaigns_change ?? 0) >= 0 ? "text-green-600" : "text-red-600"}`}
+                  >
+                    {(statsData.stats.active_campaigns_change ?? 0) > 0
+                      ? "+"
+                      : ""}
+                    {statsData.stats.active_campaigns_change ?? 0}% from last
+                    month
                   </p>
                 </>
               ) : (
-                <div className="mt-4 text-xl text-muted-foreground">No data available</div>
+                <div className="mt-4 text-xl text-muted-foreground">
+                  No data available
+                </div>
               )}
             </div>
             <div className="rounded-xl border bg-card p-6 shadow-sm">
@@ -203,9 +210,12 @@ export default function Page() {
                         <div>
                           <p className="font-medium">{campaign.name}</p>
                           <p className="text-sm text-muted-foreground">
-                            {formatDistanceToNow(new Date(campaign.created_at), {
-                              addSuffix: true,
-                            })}
+                            {formatDistanceToNow(
+                              new Date(campaign.created_at),
+                              {
+                                addSuffix: true,
+                              }
+                            )}
                           </p>
                         </div>
                         <div className="flex items-center gap-2">

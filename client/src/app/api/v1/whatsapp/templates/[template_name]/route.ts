@@ -3,7 +3,7 @@ import { getToken } from "next-auth/jwt";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ template_name: string }> | { template_name: string } }
+  { params }: { params: Promise<{ template_name: string }> }
 ) {
   try {
     const { template_name } = await params;
@@ -19,8 +19,13 @@ export async function GET(
       );
     }
 
-    const url = new URL(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/whatsapp/templates/${template_name}`);
-    url.searchParams.append('phone_number_id', process.env.NEXT_PUBLIC_PHONE_NUMBER_ID || '');
+    const url = new URL(
+      `${process.env.NEXT_PUBLIC_API_URL}/api/v1/whatsapp/templates/${template_name}`
+    );
+    url.searchParams.append(
+      "phone_number_id",
+      process.env.NEXT_PUBLIC_PHONE_NUMBER_ID || ""
+    );
 
     const response = await fetch(url, {
       headers: {
@@ -49,9 +54,10 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { template_name: string } }
+  { params }: { params: Promise<{ template_name: string }> }
 ) {
   try {
+    const { template_name } = await params;
     const token = await getToken({
       req: request,
       secret: process.env.AUTH_SECRET,
@@ -66,7 +72,7 @@ export async function PUT(
 
     const body = await request.json();
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/api/v1/whatsapp/templates/${params.template_name}`,
+      `${process.env.NEXT_PUBLIC_API_URL}/api/v1/whatsapp/templates/${template_name}`,
       {
         method: "PUT",
         headers: {
@@ -97,9 +103,10 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { template_name: string } }
+  { params }: { params: Promise<{ template_name: string }> }
 ) {
   try {
+    const { template_name } = await params;
     const token = await getToken({
       req: request,
       secret: process.env.AUTH_SECRET,
@@ -113,7 +120,7 @@ export async function DELETE(
     }
 
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL}/api/v1/whatsapp/templates/${params.template_name}`,
+      `${process.env.NEXT_PUBLIC_API_URL}/api/v1/whatsapp/templates/${template_name}`,
       {
         method: "DELETE",
         headers: {
@@ -138,4 +145,4 @@ export async function DELETE(
       { status: 500 }
     );
   }
-} 
+}

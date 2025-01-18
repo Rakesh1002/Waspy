@@ -30,20 +30,24 @@ const templateSchema = z.object({
   name: z.string().min(1, "Template name is required"),
   category: z.enum(["MARKETING", "UTILITY", "AUTHENTICATION"]),
   language: z.string().min(2, "Language code is required"),
-  header: z.object({
-    format: z.enum(["TEXT", "IMAGE", "VIDEO", "DOCUMENT"]),
-    text: z.string().optional(),
-  }).optional(),
+  header: z
+    .object({
+      format: z.enum(["TEXT", "IMAGE", "VIDEO", "DOCUMENT"]),
+      text: z.string().optional(),
+    })
+    .optional(),
   body: z.string().min(1, "Message body is required"),
   footer: z.string().optional(),
-  buttons: z.array(
-    z.object({
-      type: z.enum(["URL", "PHONE_NUMBER", "QUICK_REPLY"]),
-      text: z.string(),
-      url: z.string().optional(),
-      phone_number: z.string().optional(),
-    })
-  ).optional(),
+  buttons: z
+    .array(
+      z.object({
+        type: z.enum(["URL", "PHONE_NUMBER", "QUICK_REPLY"]),
+        text: z.string(),
+        url: z.string().optional(),
+        phone_number: z.string().optional(),
+      })
+    )
+    .optional(),
 });
 
 type TemplateFormValues = z.infer<typeof templateSchema>;
@@ -78,7 +82,9 @@ export function CreateTemplateForm() {
       toast.success("Template created successfully");
       router.push("/dashboard/templates");
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Failed to create template");
+      toast.error(
+        error instanceof Error ? error.message : "Failed to create template"
+      );
       console.error(error);
     } finally {
       setIsSubmitting(false);
@@ -166,7 +172,8 @@ export function CreateTemplateForm() {
                 />
               </FormControl>
               <FormDescription>
-                Use {'{{'}1{'}}'}, {'{{'}2{'}}'}, etc. for variables. Example: Hello {'{{'}1{'}}'}, your order {'{{'}2{'}}'}
+                Use {"{{"}1{"}}"}, {"{{"}2{"}}"}, etc. for variables. Example:
+                Hello {"{{"}1{"}}"}, your order {"{{"}2{"}}"}
               </FormDescription>
               <FormMessage />
             </FormItem>
@@ -188,4 +195,4 @@ export function CreateTemplateForm() {
       </form>
     </Form>
   );
-} 
+}

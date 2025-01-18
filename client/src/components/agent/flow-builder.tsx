@@ -32,14 +32,10 @@ export function FlowBuilder({ nodes }: FlowBuilderProps) {
           strategy={verticalListSortingStrategy}
         >
           {nodes.map((node) => (
-            <AgentNode
-              key={node.id}
-              id={node.id}
-              type={node.type}
-            />
+            <AgentNode key={node.id} id={node.id} type={node.type} />
           ))}
         </SortableContext>
       </div>
     </Card>
   );
-} 
+}

@@ -1,7 +1,12 @@
 import { Card } from "@/components/ui/card";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { MessageSquare, ArrowRight, AlertCircle, FileQuestion } from "lucide-react";
+import {
+  MessageSquare,
+  ArrowRight,
+  AlertCircle,
+  FileQuestion,
+} from "lucide-react";
 
 interface AgentNodeProps {
   id: string;
@@ -23,13 +28,8 @@ const nodeColors = {
 };
 
 export function AgentNode({ id, type }: AgentNodeProps) {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-  } = useSortable({ id });
+  const { attributes, listeners, setNodeRef, transform, transition } =
+    useSortable({ id });
 
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -48,4 +48,4 @@ export function AgentNode({ id, type }: AgentNodeProps) {
       </Card>
     </div>
   );
-} 
+}

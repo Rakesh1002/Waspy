@@ -84,21 +84,23 @@ export function CampaignList() {
   const handleDelete = async (campaignId: string) => {
     try {
       const response = await fetch(`/api/v1/whatsapp/campaigns/${campaignId}`, {
-        method: 'DELETE',
-        credentials: 'include',
+        method: "DELETE",
+        credentials: "include",
       });
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.error || 'Failed to delete campaign');
+        throw new Error(error.error || "Failed to delete campaign");
       }
 
       // Remove campaign from state
-      setCampaigns(campaigns.filter(c => c.id !== campaignId));
-      toast.success('Campaign deleted successfully');
+      setCampaigns(campaigns.filter((c) => c.id !== campaignId));
+      toast.success("Campaign deleted successfully");
     } catch (error) {
-      console.error('Error deleting campaign:', error);
-      toast.error(error instanceof Error ? error.message : 'Failed to delete campaign');
+      console.error("Error deleting campaign:", error);
+      toast.error(
+        error instanceof Error ? error.message : "Failed to delete campaign"
+      );
     } finally {
       setShowDeleteDialog(false);
       setDeletingCampaign(null);
@@ -178,8 +180,8 @@ export function CampaignList() {
               </div>
 
               <div className="flex gap-2">
-                <Button 
-                  variant="ghost" 
+                <Button
+                  variant="ghost"
                   size="sm"
                   onClick={() => {
                     setSelectedCampaign(campaign.id);
@@ -209,7 +211,7 @@ export function CampaignList() {
 
       {/* Campaign Details Dialog */}
       <CampaignDetailsDialog
-        campaignId={selectedCampaign || ''}
+        campaignId={selectedCampaign || ""}
         open={showDetailsDialog}
         onOpenChange={setShowDetailsDialog}
       />
@@ -220,8 +222,8 @@ export function CampaignList() {
           <AlertDialogHeader>
             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the campaign
-              and all its associated data.
+              This action cannot be undone. This will permanently delete the
+              campaign and all its associated data.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

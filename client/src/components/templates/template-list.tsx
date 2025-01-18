@@ -52,9 +52,12 @@ export function TemplateList() {
 
   async function deleteTemplate(templateName: string) {
     try {
-      const response = await fetch(`/api/v1/whatsapp/templates/${templateName}`, {
-        method: "DELETE",
-      });
+      const response = await fetch(
+        `/api/v1/whatsapp/templates/${templateName}`,
+        {
+          method: "DELETE",
+        }
+      );
 
       if (!response.ok) {
         const data = await response.json();
@@ -64,7 +67,9 @@ export function TemplateList() {
       toast.success("Template deleted successfully");
       fetchTemplates(); // Refresh the list
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Failed to delete template");
+      toast.error(
+        error instanceof Error ? error.message : "Failed to delete template"
+      );
       console.error(error);
     }
   }
@@ -102,7 +107,9 @@ export function TemplateList() {
                 <TableCell>{template.language}</TableCell>
                 <TableCell>
                   <Badge
-                    variant={template.status === "APPROVED" ? "success" : "secondary"}
+                    variant={
+                      template.status === "APPROVED" ? "success" : "secondary"
+                    }
                   >
                     {template.status}
                   </Badge>
@@ -112,14 +119,20 @@ export function TemplateList() {
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => router.push(`/dashboard/templates/${template.name}`)}
+                      onClick={() =>
+                        router.push(`/dashboard/templates/${template.name}`)
+                      }
                     >
                       <Eye className="h-4 w-4" />
                     </Button>
                     <Button
                       variant="ghost"
                       size="sm"
-                      onClick={() => router.push(`/dashboard/templates/${template.name}/edit`)}
+                      onClick={() =>
+                        router.push(
+                          `/dashboard/templates/${template.name}/edit`
+                        )
+                      }
                     >
                       <Edit className="h-4 w-4" />
                     </Button>
@@ -127,7 +140,11 @@ export function TemplateList() {
                       variant="ghost"
                       size="sm"
                       onClick={() => {
-                        if (window.confirm("Are you sure you want to delete this template?")) {
+                        if (
+                          window.confirm(
+                            "Are you sure you want to delete this template?"
+                          )
+                        ) {
                           deleteTemplate(template.name);
                         }
                       }}
@@ -143,4 +160,4 @@ export function TemplateList() {
       </div>
     </div>
   );
-} 
+}
