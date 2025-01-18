@@ -6,7 +6,7 @@ const nextConfig: NextConfig = {
     API_KEY: process.env.API_KEY,
   },
   images: {
-    domains: ['lh3.googleusercontent.com'], // For Google OAuth profile pictures
+    domains: ["lh3.googleusercontent.com"], // For Google OAuth profile pictures
   },
   // Production optimizations
   poweredByHeader: false,

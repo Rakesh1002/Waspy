@@ -29,6 +29,7 @@ class WhatsAppBot:
         }
 
     async def handle_message(self, body: Dict[Any, Any], db: Session) -> Dict[str, Any]:
+        """Handle incoming WhatsApp messages with AI responses"""
         try:
             if not is_valid_whatsapp_message(body):
                 raise ValueError("Invalid WhatsApp message format")
@@ -194,7 +195,7 @@ class WhatsAppBot:
                 logger.error("Response: %s", e.response.text)
 
     async def send_typing_indicator(self, recipient: str) -> None:
-        """Send typing indicator to recipient."""
+        """Send typing indicator to recipient"""
         try:
             data = {
                 "messaging_product": "whatsapp",
@@ -218,7 +219,7 @@ class WhatsAppBot:
                 logger.error("Response: %s", e.response.text)
 
     async def get_templates(self) -> Dict[str, Any]:
-        """Fetch templates from WhatsApp Business API."""
+        """Fetch templates from WhatsApp Business API"""
         try:
             url = f"{self.base_url}/{settings.BUSINESS_ID}/message_templates"
 

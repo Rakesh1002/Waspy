@@ -3,31 +3,38 @@
 import Link from "next/link";
 import { Container } from "@/components/ui/container";
 import Image from "next/image";
+import { Github, Linkedin } from "lucide-react";
 
 const footerLinks = {
   product: [
-    { label: "Features", href: "/features" },
-    { label: "Pricing", href: "/pricing" },
-    { label: "Documentation", href: "/docs" },
-    { label: "API Reference", href: "/api-docs" },
+    { label: "Features", href: "/#features" },
+    { label: "Pricing", href: "/#pricing" },
+    { label: "Documentation", href: "/#docs" },
+    { label: "API Reference", href: "/#api-docs" },
   ],
   company: [
-    { label: "About", href: "/about" },
-    { label: "Blog", href: "/blog" },
-    { label: "Careers", href: "/careers" },
-    { label: "Contact", href: "/contact" },
+    { label: "About", href: "/#about" },
+    { label: "Blog", href: "/#blog" },
+    { label: "Careers", href: "/#careers" },
+    { label: "Contact", href: "/#contact" },
   ],
   legal: [
-    { label: "Privacy Policy", href: "/privacy" },
-    { label: "Terms of Service", href: "/terms" },
+    { label: "Privacy", href: "/privacy" },
+    { label: "Terms", href: "/terms" },
     { label: "Security", href: "/security" },
     { label: "Compliance", href: "/compliance" },
   ],
   social: [
-    { label: "Twitter", href: "https://twitter.com" },
-    { label: "GitHub", href: "https://github.com" },
-    { label: "LinkedIn", href: "https://linkedin.com" },
-    { label: "Discord", href: "https://discord.com" },
+    {
+      label: "GitHub",
+      href: "https://github.com/Rakesh1002/Waspy",
+      icon: Github,
+    },
+    {
+      label: "LinkedIn",
+      href: "https://www.linkedin.com/company/waspy-ai/",
+      icon: Linkedin,
+    },
   ],
 };
 
@@ -48,8 +55,8 @@ export function Footer() {
               />
             </Link>
             <p className="mt-4 text-sm text-muted-foreground max-w-xs">
-              AI-powered WhatsApp support platform for modern businesses. Build,
-              deploy, and scale intelligent bots with ease.
+              Build and deploy custom WhatsApp AI agents. Powerful enough for
+              enterprises, simple enough for everyone.
             </p>
           </div>
 
@@ -109,15 +116,16 @@ export function Footer() {
             © {new Date().getFullYear()} WASPY. All rights reserved.
           </p>
           <div className="flex gap-6">
-            {footerLinks.social.map((link) => (
+            {footerLinks.social.map(({ href, icon: Icon, label }) => (
               <Link
-                key={link.href}
-                href={link.href}
-                className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                key={href}
+                href={href}
+                className="text-muted-foreground hover:text-foreground transition-colors"
                 target="_blank"
                 rel="noopener noreferrer"
+                aria-label={label}
               >
-                {link.label}
+                <Icon className="h-5 w-5" />
               </Link>
             ))}
           </div>
@@ -125,4 +133,4 @@ export function Footer() {
       </Container>
     </footer>
   );
-} 
+}

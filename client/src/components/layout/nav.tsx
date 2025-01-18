@@ -6,12 +6,32 @@ import { Button } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
 import { ThemeToggle } from "@/components/theme-toggle";
 import Image from "next/image";
+import { useState, useEffect } from "react";
+import { cn } from "@/lib/utils";
 
 export function Nav() {
   const { data: session } = useSession();
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollThreshold = window.innerHeight * 0.1;
+      const isScrolled = window.scrollY > scrollThreshold;
+      setScrolled(isScrolled);
+    };
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   return (
-    <nav className="fixed top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <nav
+      className={cn(
+        "fixed top-0 z-50 w-full transition-all duration-300",
+        scrolled
+          ? "bg-background/30 backdrop-blur-md border-b"
+          : "bg-transparent"
+      )}
+    >
       <Container className="flex h-16 items-center justify-between">
         <Link href="/" className="flex items-center space-x-2">
           <Image
@@ -36,4 +56,4 @@ export function Nav() {
       </Container>
     </nav>
   );
-} 
+}

@@ -39,7 +39,9 @@ export const metadata: Metadata = {
     address: false,
     telephone: false,
   },
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://waspy.ai"),
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_APP_URL || "https://waspy.unquest.ai"
+  ),
   openGraph: {
     type: "website",
     locale: "en_US",
@@ -57,10 +59,7 @@ export const metadata: Metadata = {
     creator: "@waspyai",
   },
   icons: {
-    icon: [
-      { url: "/favicon.ico", sizes: "32x32" },
-      { url: "/favicon.svg", type: "image/svg+xml" },
-    ],
+    icon: [{ url: "/favicon.svg", type: "image/svg+xml" }],
     apple: [{ url: "/apple-touch-icon.png", sizes: "180x180" }],
   },
   manifest: "/site.webmanifest",

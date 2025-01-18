@@ -1,81 +1,50 @@
-import { NextResponse } from "next/server";
-import { auth } from "@/auth";
+import { NextRequest } from "next/server";
+import { getToken } from "next-auth/jwt";
 
-export async function POST(req: Request) {
+export async function POST(request: NextRequest) {
+  // Get the session token
+  const token = await getToken({
+    req: request,
+    secret: process.env.AUTH_SECRET,
+  });
+
+  if (!token) {
+    return Response.json(
+      { success: false, error: "Not authenticated" },
+      { status: 401 }
+    );
+  }
+
   try {
-    const session = await auth();
+    const body = await request.json();
 
-    // Add authentication check
-    if (!session) {
-      return new NextResponse(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401,
-        headers: { "Content-Type": "application/json" },
-      });
-    }
+    const response = await fetch(
+      `${process.env.API_URL}/api/v1/whatsapp/send`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token.access_token}`,
+        },
+        body: JSON.stringify(body),
+      }
+    );
 
-    const body = await req.json();
-
-    console.debug("[WHATSAPP_SEND] Request body:", body);
-
-    const apiUrl = process.env.API_URL;
-    const apiKey = process.env.API_KEY;
-
-    if (!apiUrl || !apiKey) {
-      throw new Error("Missing API configuration");
-    }
-
-    // Make the API call
-    const response = await fetch(`${apiUrl}/api/v1/whatsapp/send`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(body),
-    });
-
-    // Get response as text first
-    const responseText = await response.text();
-    console.debug("[WHATSAPP_SEND] Raw response:", responseText);
-
-    // Try to parse as JSON
-    let responseData;
-    try {
-      responseData = JSON.parse(responseText);
-    } catch {
-      responseData = { detail: responseText };
-    }
-
-    // Log the parsed response
-    console.debug("[WHATSAPP_SEND] Parsed response:", responseData);
+    const data = await response.json();
 
     if (!response.ok) {
-      // Return error response
-      return new NextResponse(
-        JSON.stringify({
-          error: responseData.detail || "Failed to send message",
-        }),
-        {
-          status: response.status,
-          headers: { "Content-Type": "application/json" },
-        }
+      return Response.json(
+        { success: false, error: data.detail || "Failed to send message" },
+        { status: response.status }
       );
     }
 
-    // Return success response
-    return NextResponse.json({
-      success: true,
-      data: responseData,
-    });
+    return Response.json({ success: true });
   } catch (error) {
-    console.error("[WHATSAPP_SEND] Error:", error);
-    return new NextResponse(
-      JSON.stringify({
-        error: error instanceof Error ? error.message : "Internal server error",
-      }),
-      {
-        status: 500,
-        headers: { "Content-Type": "application/json" },
-      }
+    console.error("[WHATSAPP_SEND]", error);
+    return Response.json(
+      { success: false, error: "Failed to send message" },
+      { status: 500 }
     );
   }
 }

@@ -12,7 +12,10 @@ const stats = [
 
 export function StatsSection() {
   return (
-    <section className="border-t bg-gradient-to-b from-muted/50 to-background">
+    <section className="relative bg-gradient-to-b from-background via-background to-muted/10">
+      <div className="absolute inset-0 -z-10">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--gradient-3)/0.1,_transparent_70%)]" />
+      </div>
       <motion.div
         variants={staggerContainer}
         initial="hidden"
@@ -22,8 +25,12 @@ export function StatsSection() {
       >
         <div className="grid gap-8 text-center md:grid-cols-4">
           {stats.map((stat, i) => (
-            <motion.div key={i} variants={fadeIn} className="space-y-2">
-              <h4 className="text-5xl font-bold tracking-tight">
+            <motion.div
+              key={i}
+              variants={fadeIn}
+              className="group space-y-2 p-6 rounded-xl transition-all duration-300 hover:bg-background/60 hover:backdrop-blur-sm"
+            >
+              <h4 className="text-5xl font-bold tracking-tight text-primary">
                 {stat.value}
               </h4>
               <p className="text-sm text-muted-foreground">{stat.label}</p>
@@ -33,4 +40,4 @@ export function StatsSection() {
       </motion.div>
     </section>
   );
-} 
+}
