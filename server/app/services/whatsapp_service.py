@@ -75,53 +75,58 @@ class WhatsAppService:
         self,
         phone_number: str,
         template_name: str,
-        template_data: Optional[Dict] = None,
+        template_data: Optional[dict] = None
     ) -> Dict[str, Any]:
         """Send a template message."""
         try:
-            language_code = (
-                template_data.get("language", {}).get("code")
-                if template_data and template_data.get("language")
-                else "en"
+            # Format phone number to include country code if not present
+            formatted_phone = (
+                phone_number if phone_number.startswith("+") 
+                else f"+{phone_number}"
             )
 
-            # Basic template payload
+            # Prepare template message payload
             payload = {
                 "messaging_product": "whatsapp",
-                "to": phone_number,
+                "to": formatted_phone,  # Use formatted phone number
                 "type": "template",
                 "template": {
                     "name": template_name,
-                    "language": {"code": language_code}
+                    "language": {
+                        "code": template_data.get("language", {}).get("code", "en_US")
+                    },
+                    "components": []
                 }
             }
 
-            # Only add components if they exist and are valid
-            if template_data and "components" in template_data:
-                # Validate components structure
-                components = template_data["components"]
-                if isinstance(components, list):
-                    # Filter out any components without parameters
-                    valid_components = [
-                        comp for comp in components 
-                        if isinstance(comp, dict) 
-                        and comp.get("type") 
-                        and comp.get("parameters")
-                        and isinstance(comp["parameters"], list)
-                    ]
-                    
-                    if valid_components:
-                        payload["template"]["components"] = valid_components
+            # Add components with proper parameters
+            if template_data and template_data.get("components"):
+                for component in template_data["components"]:
+                    comp_type = component.get("type", "").upper()
+                    if comp_type in ["HEADER", "BODY"]:
+                        # Get text from parameters or default text
+                        text = (component.get("parameters", [{}])[0].get("text") or 
+                               component.get("text", "")).strip()
+                        
+                        # Only include component if it has non-empty text
+                        if text:
+                            payload["template"]["components"].append({
+                                "type": comp_type,
+                                "parameters": [
+                                    {
+                                        "type": "text",
+                                        "text": text
+                                    }
+                                ]
+                            })
 
             logger.debug(f"Template message payload:\n{json.dumps(payload, indent=2)}")
-            return await self._send_message(payload)
+            
+            response = await self._send_message(payload)
+            return response
 
         except Exception as e:
-            if "Template name does not exist" in str(e):
-                raise WhatsAppError(
-                    message=f"Template '{template_name}' not found in language '{language_code}'",
-                    status_code=404
-                )
+            logger.error(f"Error sending template message: {str(e)}")
             raise WhatsAppError(
                 message=f"Failed to send template message: {str(e)}",
                 status_code=500

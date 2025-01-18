@@ -39,7 +39,7 @@ export const metadata: Metadata = {
     address: false,
     telephone: false,
   },
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://waspy.ai"),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://waspy.unquest.ai"),
   openGraph: {
     type: "website",
     locale: "en_US",

@@ -36,23 +36,22 @@ class Settings(BaseSettings):
 
     # WhatsApp Configuration
     WHATSAPP_TOKEN: str
-    VERIFY_TOKEN: str
     PHONE_NUMBER_ID: str
-    APP_ID: str
-    APP_SECRET: str
-    RECIPIENT_WAID: str
-    VERSION: str
+    VERSION: str = "v21.0"
     BUSINESS_ID: str
     WEBHOOK_URL: str
+    VERIFY_TOKEN: str
+    APP_ID: str
+    APP_SECRET: str
 
     @property
     def WHATSAPP_API_URL(self) -> str:
-        """Get WhatsApp API URL."""
         return f"https://graph.facebook.com/{self.VERSION}"
 
     # OpenAI Configuration
     OPENAI_API_KEY: str
     OPENAI_ASSISTANT_ID: str
+    OPENAI_MODEL: str = "gpt-4o-mini"
 
     # Security
     SECRET_KEY: str

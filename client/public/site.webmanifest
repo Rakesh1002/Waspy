@@ -1,19 +1,19 @@
 {
-  "name": "WASPY - AI-powered WhatsApp Support Platform",
+  "name": "WASPY - AI-powered WhatsApp Agents",
   "short_name": "WASPY",
-  "description": "Build, deploy, and scale AI-powered WhatsApp bots with our enterprise platform",
+  "description": "Build, deploy, and scale AI-powered WhatsApp Agents with our enterprise platform",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#3B82F6",
   "icons": [
     {
-      "src": "/android-chrome-192x192.png",
-      "sizes": "192x192",
+      "src": "/logos/logo-icon-1024x1024.png",
+      "sizes": "1024x1024",
       "type": "image/png"
     },
     {
-      "src": "/android-chrome-512x512.png",
+      "src": "/logos/logo-icon-512x512.png",
       "sizes": "512x512",
       "type": "image/png"
     }

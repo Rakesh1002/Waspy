@@ -1,4 +1,4 @@
-from typing import Dict, Optional
+from typing import Dict, Optional, Literal, List
 
 from pydantic import BaseModel
 
@@ -13,4 +13,25 @@ class WhatsAppMessageRequest(BaseModel):
     message: Optional[str] = None
     use_template: bool = False
     template_name: Optional[str] = None
-    template: Optional[WhatsAppTemplate] = None
+    template: Optional[dict] = None
+    campaign_name: Optional[str] = None
+    from_number: str
+    recipients: Optional[List[str]] = None
+
+class PhoneNumber(BaseModel):
+    id: str
+    verified_name: str
+    display_phone_number: str
+    quality_rating: str
+    code_verification_status: Optional[str]
+    whatsapp_registered: bool = False
+
+class VerificationRequest(BaseModel):
+    phone_number: str
+    cc: str  # country code
+    method: Literal["sms", "voice"]
+
+class VerificationCode(BaseModel):
+    phone_number: str
+    cc: str
+    code: str
