@@ -150,3 +150,22 @@ class WhatsAppService:
                 message=f"Failed to send text message: {str(e)}",
                 status_code=500
             ) from e
+
+    async def verify_token(self) -> bool:
+        """Verify WhatsApp token is valid."""
+        try:
+            # Simple API call to verify token
+            url = f"{settings.WHATSAPP_API_URL}/{settings.PHONE_NUMBER_ID}/phone_numbers"
+            headers = {
+                "Authorization": f"Bearer {settings.WHATSAPP_TOKEN}",
+                "Content-Type": "application/json"
+            }
+            
+            async with httpx.AsyncClient() as client:
+                response = await client.get(url, headers=headers)
+                response.raise_for_status()
+                return True
+                
+        except Exception as e:
+            logger.error(f"WhatsApp token verification failed: {str(e)}")
+            raise ValueError(f"Invalid WhatsApp token: {str(e)}")

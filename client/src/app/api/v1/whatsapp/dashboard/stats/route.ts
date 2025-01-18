@@ -6,10 +6,9 @@ export async function GET() {
     const session = await auth();
 
     if (!session) {
-      return new NextResponse(
-        JSON.stringify({ error: "Unauthorized" }), 
-        { status: 401 }
-      );
+      return new NextResponse(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+      });
     }
 
     const apiUrl = process.env.API_URL;
@@ -19,7 +18,7 @@ export async function GET() {
 
     const response = await fetch(`${apiUrl}/api/v1/whatsapp/dashboard/stats`, {
       headers: {
-        "Authorization": `Bearer ${process.env.API_KEY}`,
+        Authorization: `Bearer ${process.env.API_KEY}`,
         "Content-Type": "application/json",
       },
     });
@@ -30,12 +29,11 @@ export async function GET() {
 
     const data = await response.json();
     return NextResponse.json(data);
-
   } catch (error) {
     console.error("Error fetching dashboard stats:", error);
     return new NextResponse(
-      JSON.stringify({ error: "Failed to fetch dashboard stats" }), 
+      JSON.stringify({ error: "Failed to fetch dashboard stats" }),
       { status: 500 }
     );
   }
-} 
+}

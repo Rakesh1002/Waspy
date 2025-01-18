@@ -35,9 +35,12 @@ export default function KnowledgeBasePage() {
       <main className="flex-1">
         <div className="mx-auto max-w-6xl space-y-4 p-4 lg:p-8 lg:pt-6">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight">Knowledge Base</h1>
+            <h1 className="text-2xl font-bold tracking-tight">
+              Knowledge Base
+            </h1>
             <p className="text-muted-foreground">
-              Manage your AI assistant&apos;s knowledge base by uploading files or connecting to databases.
+              Manage your AI assistant&apos;s knowledge base by uploading files
+              or connecting to databases.
             </p>
           </div>
 
@@ -46,4 +49,4 @@ export default function KnowledgeBasePage() {
       </main>
     </div>
   );
-} 
+}

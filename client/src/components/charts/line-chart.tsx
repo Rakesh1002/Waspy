@@ -1,16 +1,23 @@
-"use client"
+"use client";
 
-import { Line, LineChart as RechartsLineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts"
+import {
+  Line,
+  LineChart as RechartsLineChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
 
 interface ChartData {
   name: string;
   "Messages Sent": number;
   "Messages Opened": number;
-  "Responses": number;
+  Responses: number;
 }
 
 interface LineChartProps {
-  data: ChartData[]
+  data: ChartData[];
 }
 
 export function LineChart({ data }: LineChartProps) {
@@ -55,5 +62,5 @@ export function LineChart({ data }: LineChartProps) {
         />
       </RechartsLineChart>
     </ResponsiveContainer>
-  )
-} 
+  );
+}

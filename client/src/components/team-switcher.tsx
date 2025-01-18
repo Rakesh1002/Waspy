@@ -1,7 +1,7 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { ChevronsUpDown, Plus, LucideIcon } from "lucide-react"
+import * as React from "react";
+import { ChevronsUpDown, Plus, LucideIcon } from "lucide-react";
 
 import {
   DropdownMenu,
@@ -11,30 +11,30 @@ import {
   DropdownMenuSeparator,
   DropdownMenuShortcut,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from "@/components/ui/dropdown-menu";
 import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
   useSidebar,
-} from "@/components/ui/sidebar"
+} from "@/components/ui/sidebar";
 
 interface Team {
-  name: string
-  logo: LucideIcon
-  plan: string
+  name: string;
+  logo: LucideIcon;
+  plan: string;
 }
 
 interface TeamSwitcherProps {
-  teams: Team[]
+  teams: Team[];
 }
 
 export function TeamSwitcher({ teams }: TeamSwitcherProps) {
-  const { state, isMobile } = useSidebar()
-  const [activeTeam] = React.useState(teams[0])
+  const { state, isMobile } = useSidebar();
+  const [activeTeam] = React.useState(teams[0]);
 
   if (!activeTeam) {
-    return null
+    return null;
   }
 
   return (
@@ -72,10 +72,7 @@ export function TeamSwitcher({ teams }: TeamSwitcherProps) {
               Teams
             </DropdownMenuLabel>
             {teams.map((team, index) => (
-              <DropdownMenuItem
-                key={team.name}
-                className="gap-2 p-2"
-              >
+              <DropdownMenuItem key={team.name} className="gap-2 p-2">
                 <div className="flex size-6 items-center justify-center rounded-sm border">
                   <team.logo className="size-4 shrink-0" />
                 </div>
@@ -94,5 +91,5 @@ export function TeamSwitcher({ teams }: TeamSwitcherProps) {
         </DropdownMenu>
       </SidebarMenuItem>
     </SidebarMenu>
-  )
+  );
 }

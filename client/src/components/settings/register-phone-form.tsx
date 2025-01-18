@@ -1,31 +1,31 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
-import { toast } from "sonner"
-import { Loader2 } from "lucide-react"
-import { countryCodes } from "@/lib/country-codes"
+} from "@/components/ui/select";
+import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
+import { countryCodes } from "@/lib/country-codes";
 
 interface RegisterPhoneFormProps {
-  onSuccess: () => void
+  onSuccess: () => void;
 }
 
 export function RegisterPhoneForm({ onSuccess }: RegisterPhoneFormProps) {
-  const [loading, setLoading] = useState(false)
-  const [countryCode, setCountryCode] = useState("")
-  const [phoneNumber, setPhoneNumber] = useState("")
-  const [verificationCode, setVerificationCode] = useState("")
-  const [method, setMethod] = useState<"sms" | "voice">("sms")
-  const [step, setStep] = useState<"request" | "verify">("request")
-  const [cert, setCert] = useState("")
+  const [loading, setLoading] = useState(false);
+  const [countryCode, setCountryCode] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [verificationCode, setVerificationCode] = useState("");
+  const [method, setMethod] = useState<"sms" | "voice">("sms");
+  const [step, setStep] = useState<"request" | "verify">("request");
+  const [cert, setCert] = useState("");
 
   const validatePhoneNumber = (number: string) => {
     // Basic validation - can be enhanced based on requirements
@@ -37,7 +37,7 @@ export function RegisterPhoneForm({ onSuccess }: RegisterPhoneFormProps) {
       toast.error("Please enter a valid 10-digit phone number");
       return;
     }
-    setLoading(true)
+    setLoading(true);
     try {
       const response = await fetch("/api/v1/whatsapp/account", {
         method: "POST",
@@ -48,22 +48,22 @@ export function RegisterPhoneForm({ onSuccess }: RegisterPhoneFormProps) {
           method,
           cert,
         }),
-      })
+      });
 
-      if (!response.ok) throw new Error("Failed to register account")
-      
-      toast.success("Account registration initiated successfully")
-      setStep("verify")
+      if (!response.ok) throw new Error("Failed to register account");
+
+      toast.success("Account registration initiated successfully");
+      setStep("verify");
     } catch (error) {
-      console.error("[ACCOUNT_REGISTER]", error)
-      toast.error("Failed to register account")
+      console.error("[ACCOUNT_REGISTER]", error);
+      toast.error("Failed to register account");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const handleVerifyCode = async () => {
-    setLoading(true)
+    setLoading(true);
     try {
       const response = await fetch("/api/v1/whatsapp/verify-code", {
         method: "POST",
@@ -73,19 +73,19 @@ export function RegisterPhoneForm({ onSuccess }: RegisterPhoneFormProps) {
           cc: countryCode.replace("+", ""),
           phone_number: phoneNumber,
         }),
-      })
+      });
 
-      if (!response.ok) throw new Error("Failed to verify code")
+      if (!response.ok) throw new Error("Failed to verify code");
 
-      toast.success("Phone number verified successfully")
-      onSuccess()
+      toast.success("Phone number verified successfully");
+      onSuccess();
     } catch (error) {
-      console.error("[CODE_VERIFY]", error)
-      toast.error("Failed to verify code")
+      console.error("[CODE_VERIFY]", error);
+      toast.error("Failed to verify code");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <div className="space-y-4">
@@ -118,7 +118,10 @@ export function RegisterPhoneForm({ onSuccess }: RegisterPhoneFormProps) {
               onChange={(e) => setPhoneNumber(e.target.value)}
             />
           </div>
-          <Select value={method} onValueChange={(v) => setMethod(v as "sms" | "voice")}>
+          <Select
+            value={method}
+            onValueChange={(v) => setMethod(v as "sms" | "voice")}
+          >
             <SelectTrigger>
               <SelectValue placeholder="Verification method" />
             </SelectTrigger>
@@ -133,8 +136,8 @@ export function RegisterPhoneForm({ onSuccess }: RegisterPhoneFormProps) {
             value={cert}
             onChange={(e) => setCert(e.target.value)}
           />
-          <Button 
-            className="w-full" 
+          <Button
+            className="w-full"
             onClick={handleRequestCode}
             disabled={loading || !countryCode || !phoneNumber || !cert}
           >
@@ -151,14 +154,14 @@ export function RegisterPhoneForm({ onSuccess }: RegisterPhoneFormProps) {
             onChange={(e) => setVerificationCode(e.target.value)}
           />
           <div className="flex gap-2">
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               onClick={() => setStep("request")}
               disabled={loading}
             >
               Back
             </Button>
-            <Button 
+            <Button
               className="flex-1"
               onClick={handleVerifyCode}
               disabled={loading || !verificationCode}
@@ -170,5 +173,5 @@ export function RegisterPhoneForm({ onSuccess }: RegisterPhoneFormProps) {
         </>
       )}
     </div>
-  )
-} 
+  );
+}

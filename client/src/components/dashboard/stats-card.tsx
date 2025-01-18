@@ -15,12 +15,15 @@ export function StatsCard({ title, value, change, loading }: StatsCardProps) {
         ) : (
           <>
             <div className="text-3xl font-bold">{value}</div>
-            <p className={`text-sm ${change >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-              {change > 0 ? '+' : ''}{change}% from last month
+            <p
+              className={`text-sm ${change >= 0 ? "text-green-600" : "text-red-600"}`}
+            >
+              {change > 0 ? "+" : ""}
+              {change}% from last month
             </p>
           </>
         )}
       </div>
     </div>
   );
-} 
+}

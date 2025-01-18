@@ -6,7 +6,6 @@ from loguru import logger
 from openai import AsyncOpenAI
 from sqlalchemy import or_
 from sqlalchemy.orm import Session
-import asyncio
 
 from app.core.config import settings
 from app.models.order import KnowledgeBase, Order
@@ -61,7 +60,6 @@ class OpenAIService:
         self.client = AsyncOpenAI(api_key=settings.OPENAI_API_KEY)
         self.max_history_length = 10
         self.support_conversation_history = {}
-        self.user_threads = {}  # Store thread IDs for each user
 
     async def load_knowledge_base_csv(self, file_path: str, db: Session) -> None:
         """Load knowledge base from CSV file into database."""
@@ -144,73 +142,79 @@ class OpenAIService:
         self, message: str, user_id: str, db: Session, context: str = "support"
     ) -> str:
         try:
-            logger.info(f"🤖 Generating OpenAI response for user {user_id}")
-            logger.info(f"Message: {message}")
+            # Get conversation history
+            history = self.support_conversation_history.get(user_id, [])
 
-            # Create thread if needed
-            if user_id not in self.user_threads:
-                thread = await self.client.beta.threads.create()
-                self.user_threads[user_id] = thread.id
-                logger.info(f"Created new thread for user {user_id}: {thread.id}")
+            # Search knowledge base for relevant information
+            kb_results = await self.search_knowledge_base(message, db)
 
-            thread_id = self.user_threads[user_id]
-            logger.info(f"Using thread ID: {thread_id}")
+            # Get customer's order details
+            order_details = await self.get_order_details(user_id, db)
 
-            # Add message to thread
-            await self.client.beta.threads.messages.create(
-                thread_id=thread_id,
-                role="user",
-                content=message
+            # Create a context-rich system message
+            system_message = SUPPORT_SYSTEM_PROMPT
+
+            # Add order information first for more prominence
+            if order_details:
+                system_message += "\n\nCustomer Order Information:\n"
+                for order in order_details:
+                    system_message += f"\nOrder #{order['order_id']}:\n"
+                    system_message += f"Status: {order['status']}\n"
+                    if order.get("delivery_date"):
+                        system_message += f"Delivery Date: {order['delivery_date']}\n"
+
+                # Add specific instructions for order-related queries
+                system_message += "\nWhen responding about orders:\n"
+                system_message += "1. Always reference specific order IDs\n"
+                system_message += "2. Include delivery dates when available\n"
+                system_message += "3. Provide clear status updates\n"
+            else:
+                system_message += "\nNo orders found for this customer.\n"
+
+            if kb_results:
+                system_message += "\n\nRelevant Knowledge Base Information:\n"
+                for result in kb_results:
+                    system_message += f"\nSource: {result['source']}\n"
+                    system_message += f"Content: {result['content']}\n"
+                    if result.get("meta_info"):
+                        system_message += f"Additional Info: {result['meta_info']}\n"
+
+            # Add user context
+            system_message += f"\nCustomer Phone: {user_id}\n"
+
+            # Construct messages with history and context
+            messages = [{"role": "system", "content": system_message}]
+            messages.extend(history[-self.max_history_length :])
+            messages.append({"role": "user", "content": message})
+
+            logger.debug(
+                f"Generating response with context. Orders found: {len(order_details)}"
             )
-            logger.info("Added user message to thread")
-
-            # Run assistant
-            run = await self.client.beta.threads.runs.create(
-                thread_id=thread_id,
-                assistant_id=settings.OPENAI_ASSISTANT_ID
+            response = await self.client.chat.completions.create(
+                model="gpt-4o-mini",
+                messages=messages,
+                max_tokens=500,
+                temperature=0.7,
+                presence_penalty=0.6,
+                frequency_penalty=0.2,
             )
-            logger.info(f"Started assistant run: {run.id}")
 
-            # Wait for completion with timeout
-            start_time = asyncio.get_event_loop().time()
-            timeout = 30  # 30 seconds timeout
-
-            while True:
-                if asyncio.get_event_loop().time() - start_time > timeout:
-                    logger.error("Assistant run timed out")
-                    return "I apologize, but the response is taking too long. Please try again."
-
-                run_status = await self.client.beta.threads.runs.retrieve(
-                    thread_id=thread_id,
-                    run_id=run.id
+            if not response.choices:
+                return (
+                    "I apologize, but I couldn't generate a response. Please try again."
                 )
-                
-                if run_status.status == 'completed':
-                    logger.info("Assistant run completed")
-                    break
-                elif run_status.status == 'failed':
-                    logger.error(f"Assistant run failed: {run_status.last_error}")
-                    return "I apologize, but I encountered an error processing your request."
-                
-                await asyncio.sleep(1)
 
-            # Get response
-            messages = await self.client.beta.threads.messages.list(
-                thread_id=thread_id
-            )
-            
-            # Get the latest assistant message
-            for msg in messages.data:
-                if msg.role == "assistant":
-                    response = msg.content[0].text.value
-                    logger.info(f"Generated response: {response}")
-                    return response
+            assistant_message = str(response.choices[0].message.content)
 
-            logger.error("No assistant message found")
-            return "I apologize, but I couldn't generate a response."
+            # Update conversation history
+            history.append({"role": "user", "content": message})
+            history.append({"role": "assistant", "content": assistant_message})
+            self.support_conversation_history[user_id] = history
+
+            return assistant_message
 
         except Exception as e:
-            logger.error(f"❌ Error generating OpenAI response: {str(e)}", exc_info=True)
+            logger.error(f"Error generating OpenAI response: {str(e)}")
             return "I apologize, but I'm having trouble processing your request right now. Please try again later."
 
     async def analyze_campaign(self, campaign_data: Dict[str, Any]) -> Dict[str, Any]:
@@ -314,36 +318,40 @@ Provide the template in the following format:
             return {"error": str(e), "success": False}
 
     async def create_assistant(self) -> str:
-        """Create an OpenAI assistant for WhatsApp support."""
-        try:
-            assistant = await self.client.beta.assistants.create(
-                name="WhatsApp Support Assistant",
-                instructions="""You are a helpful WhatsApp support assistant. Your role is to:
-                1. Answer customer queries professionally and concisely
-                2. Provide product information and support
-                3. Help with order status and tracking
-                4. Handle general inquiries
-                5. Maintain a friendly and helpful tone
+        """Create an OpenAI assistant for order support."""
+        assistant = await self.client.beta.assistants.create(
+            name="Order Support Assistant",
+            instructions="""You are a helpful customer support assistant for our e-commerce platform.
+            Help customers with:
+            1. Order status inquiries
+            2. Product information
+            3. Shipping updates
+            4. General support questions
 
-                Guidelines:
-                - Keep responses under 4000 characters
-                - Use simple, clear language
-                - Be helpful and solution-oriented
-                - Format responses appropriately for WhatsApp
-                - Use emojis sparingly and professionally
-                """,
-                model=settings.OPENAI_MODEL,
-                tools=[
-                    {
-                        "type": "retrieval"  # Enable knowledge retrieval
-                    }
-                ]
-            )
-            logger.info(f"Created new assistant with ID: {assistant.id}")
-            return assistant.id
-        except Exception as e:
-            logger.error(f"Error creating assistant: {str(e)}")
-            raise
+            Always be polite and professional. If you need to query order details, use the provided functions.
+            """,
+            model="gpt-4o-mini",
+            tools=[
+                {
+                    "type": "function",
+                    "function": {
+                        "name": "get_order_status",
+                        "description": "Get the current status of an order",
+                        "parameters": {
+                            "type": "object",
+                            "properties": {
+                                "order_number": {
+                                    "type": "string",
+                                    "description": "The order number to look up",
+                                }
+                            },
+                            "required": ["order_number"],
+                        },
+                    },
+                }
+            ],
+        )
+        return assistant.id
 
     async def get_order_status(self, order_number: str) -> Dict[str, Any]:
         """Query order status from database."""

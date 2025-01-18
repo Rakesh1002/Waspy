@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import {
   Breadcrumb,
@@ -7,14 +7,20 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"
-import { Separator } from "@/components/ui/separator"
-import { SidebarTrigger } from "@/components/ui/sidebar"
-import useSWR from 'swr';
-import { LineChart } from "@/components/charts/line-chart"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { format, formatDistanceToNow } from 'date-fns'
-import { Badge } from "@/components/ui/badge"
+} from "@/components/ui/breadcrumb";
+import { Separator } from "@/components/ui/separator";
+import { SidebarTrigger } from "@/components/ui/sidebar";
+import useSWR from "swr";
+import { LineChart } from "@/components/charts/line-chart";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { format, formatDistanceToNow } from "date-fns";
+import { Badge } from "@/components/ui/badge";
 
 interface DashboardStats {
   active_campaigns: number;
@@ -37,22 +43,22 @@ interface Campaign {
   created_at: string;
 }
 
-const fetcher = (url: string) => fetch(url).then(res => res.json());
+const fetcher = (url: string) => fetch(url).then((res) => res.json());
 
 const formatDate = (dateString: string) => {
-  return format(new Date(dateString), 'MMM d, HH:mm');
+  return format(new Date(dateString), "MMM d, HH:mm");
 };
 
 export default function Page() {
-  const { data: statsData, isLoading: statsLoading } = useSWR<{ success: boolean; stats: DashboardStats }>(
-    '/api/v1/whatsapp/dashboard/stats',
-    fetcher
-  );
+  const { data: statsData, isLoading: statsLoading } = useSWR<{
+    success: boolean;
+    stats: DashboardStats;
+  }>("/api/v1/whatsapp/dashboard/stats", fetcher);
 
-  const { data: campaignsData } = useSWR<{ success: boolean; campaigns: Campaign[] }>(
-    '/api/v1/whatsapp/campaigns',
-    fetcher
-  );
+  const { data: campaignsData } = useSWR<{
+    success: boolean;
+    campaigns: Campaign[];
+  }>("/api/v1/whatsapp/campaigns", fetcher);
 
   // Get last 5 campaigns
   const recentCampaigns = campaignsData?.campaigns?.slice(0, 5) || [];
@@ -85,9 +91,17 @@ export default function Page() {
                 <div className="mt-4 h-8 w-24 animate-pulse bg-muted rounded" />
               ) : (
                 <>
-                  <div className="mt-4 text-3xl font-bold">{statsData?.stats.active_campaigns ?? 0}</div>
-                  <p className={`text-sm ${(statsData?.stats.active_campaigns_change ?? 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                    {(statsData?.stats.active_campaigns_change ?? 0) > 0 ? '+' : ''}{statsData?.stats.active_campaigns_change ?? 0}% from last month
+                  <div className="mt-4 text-3xl font-bold">
+                    {statsData?.stats.active_campaigns ?? 0}
+                  </div>
+                  <p
+                    className={`text-sm ${(statsData?.stats.active_campaigns_change ?? 0) >= 0 ? "text-green-600" : "text-red-600"}`}
+                  >
+                    {(statsData?.stats.active_campaigns_change ?? 0) > 0
+                      ? "+"
+                      : ""}
+                    {statsData?.stats.active_campaigns_change ?? 0}% from last
+                    month
                   </p>
                 </>
               )}
@@ -98,9 +112,17 @@ export default function Page() {
                 <div className="mt-4 h-8 w-24 animate-pulse bg-muted rounded" />
               ) : (
                 <>
-                  <div className="mt-4 text-3xl font-bold">{statsData?.stats.total_messages ?? 0}</div>
-                  <p className={`text-sm ${(statsData?.stats.total_messages_change ?? 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                    {(statsData?.stats.total_messages_change ?? 0) > 0 ? '+' : ''}{statsData?.stats.total_messages_change ?? 0}% from last month
+                  <div className="mt-4 text-3xl font-bold">
+                    {statsData?.stats.total_messages ?? 0}
+                  </div>
+                  <p
+                    className={`text-sm ${(statsData?.stats.total_messages_change ?? 0) >= 0 ? "text-green-600" : "text-red-600"}`}
+                  >
+                    {(statsData?.stats.total_messages_change ?? 0) > 0
+                      ? "+"
+                      : ""}
+                    {statsData?.stats.total_messages_change ?? 0}% from last
+                    month
                   </p>
                 </>
               )}
@@ -111,9 +133,17 @@ export default function Page() {
                 <div className="mt-4 h-8 w-24 animate-pulse bg-muted rounded" />
               ) : (
                 <>
-                  <div className="mt-4 text-3xl font-bold">{statsData?.stats.response_rate ?? 0}%</div>
-                  <p className={`text-sm ${(statsData?.stats.response_rate_change ?? 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                    {(statsData?.stats.response_rate_change ?? 0) > 0 ? '+' : ''}{statsData?.stats.response_rate_change ?? 0}% from last month
+                  <div className="mt-4 text-3xl font-bold">
+                    {statsData?.stats.response_rate ?? 0}%
+                  </div>
+                  <p
+                    className={`text-sm ${(statsData?.stats.response_rate_change ?? 0) >= 0 ? "text-green-600" : "text-red-600"}`}
+                  >
+                    {(statsData?.stats.response_rate_change ?? 0) > 0
+                      ? "+"
+                      : ""}
+                    {statsData?.stats.response_rate_change ?? 0}% from last
+                    month
                   </p>
                 </>
               )}
@@ -123,16 +153,20 @@ export default function Page() {
             <Card className="col-span-4">
               <CardHeader>
                 <CardTitle>Campaign Performance</CardTitle>
-                <CardDescription>Message delivery and engagement over time</CardDescription>
+                <CardDescription>
+                  Message delivery and engagement over time
+                </CardDescription>
               </CardHeader>
               <CardContent>
-                <LineChart 
-                  data={campaignsData?.campaigns?.map(c => ({
-                    name: formatDate(c.created_at),
-                    "Messages Sent": c.sent_count,
-                    "Messages Opened": c.open_count,
-                    "Responses": c.response_count,
-                  })) || []}
+                <LineChart
+                  data={
+                    campaignsData?.campaigns?.map((c) => ({
+                      name: formatDate(c.created_at),
+                      "Messages Sent": c.sent_count,
+                      "Messages Opened": c.open_count,
+                      Responses: c.response_count,
+                    })) || []
+                  }
                 />
               </CardContent>
             </Card>
@@ -140,28 +174,40 @@ export default function Page() {
             <Card className="col-span-3">
               <CardHeader>
                 <CardTitle>Recent Activity</CardTitle>
-                <CardDescription>Your most recent campaign interactions</CardDescription>
+                <CardDescription>
+                  Your most recent campaign interactions
+                </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {recentCampaigns.map(campaign => (
-                    <div key={campaign.id} className="flex items-center justify-between">
+                  {recentCampaigns.map((campaign) => (
+                    <div
+                      key={campaign.id}
+                      className="flex items-center justify-between"
+                    >
                       <div>
                         <p className="font-medium">{campaign.name}</p>
                         <p className="text-sm text-muted-foreground">
-                          {formatDistanceToNow(new Date(campaign.created_at), { addSuffix: true })}
+                          {formatDistanceToNow(new Date(campaign.created_at), {
+                            addSuffix: true,
+                          })}
                         </p>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Badge variant={
-                          campaign.status === 'completed' ? 'default' : 
-                          campaign.status === 'pending' ? 'secondary' : 
-                          'destructive'
-                        }>
+                        <Badge
+                          variant={
+                            campaign.status === "completed"
+                              ? "default"
+                              : campaign.status === "pending"
+                                ? "secondary"
+                                : "destructive"
+                          }
+                        >
                           {campaign.status}
                         </Badge>
                         <div className="text-sm text-muted-foreground">
-                          {campaign.sent_count} sent • {campaign.open_count} opened
+                          {campaign.sent_count} sent • {campaign.open_count}{" "}
+                          opened
                         </div>
                       </div>
                     </div>
@@ -173,5 +219,5 @@ export default function Page() {
         </div>
       </main>
     </div>
-  )
+  );
 }

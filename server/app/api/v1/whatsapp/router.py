@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response, Body
 from typing import List, Optional, Dict, Any, Union
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
@@ -7,6 +7,7 @@ from loguru import logger
 import json
 import uuid
 from datetime import datetime, timedelta
+import time
 
 from app.core.whatsapp import WhatsAppClient
 from app.api.deps import get_db, get_whatsapp_service, get_current_user
@@ -28,6 +29,7 @@ from app.utils.whatsapp_utils import (
 from app.schemas.campaign import CampaignCreate, TemplateComponent
 from app.models.user import User
 from app.models.campaign import Campaign
+from app.services.openai_service import OpenAIService
 
 router = APIRouter(prefix="/whatsapp", tags=["whatsapp"])
 whatsapp_bot = WhatsAppBot()
@@ -191,131 +193,68 @@ async def verify_code(verification: VerificationCode):
 # Messaging and Webhooks
 @router.get("/webhook")
 async def verify_webhook(
-    mode: Optional[str] = Query(None, alias="hub.mode"),
-    token: Optional[str] = Query(None, alias="hub.verify_token"),
-    challenge: Optional[str] = Query(None, alias="hub.challenge")
+    mode: str = Query(..., alias="hub.mode"),
+    token: str = Query(..., alias="hub.verify_token"),
+    challenge: str = Query(..., alias="hub.challenge"),
 ) -> Response:
     """Verify webhook endpoint for WhatsApp API"""
+    logger.debug(
+        "Webhook verification request - Mode: %s, Token: %s, Challenge: %s",
+        mode, token, challenge
+    )
+
     try:
-        logger.info(f"=== Webhook Verification Request ===")
-        logger.info(f"Mode: {mode}")
-        logger.info(f"Token: {token}")
-        logger.info(f"Challenge: {challenge}")
-        logger.info(f"Expected Token: {settings.VERIFY_TOKEN}")
-
-        # Check if this is a verification request
         if mode == "subscribe" and token == settings.VERIFY_TOKEN:
-            if challenge:
-                logger.info("✅ WEBHOOK_VERIFIED")
-                return Response(content=challenge, media_type="text/plain")
-            
-        logger.error("❌ VERIFICATION_FAILED")
-        logger.error(f"Token mismatch or invalid mode")
-        return Response(
-            content="Error validating verification",
-            status_code=403
-        )
+            logger.info("Webhook verified successfully with challenge: %s", challenge)
+            return Response(content=challenge, media_type="text/plain")
 
-    except Exception as e:
-        logger.error(f"❌ Webhook verification error: {str(e)}", exc_info=True)
-        return Response(
-            content=str(e),
-            status_code=500
+        logger.error("Webhook verification failed - Invalid mode or token")
+        logger.debug("Expected token: %s, Received token: %s", settings.VERIFY_TOKEN, token)
+        raise HTTPException(
+            status_code=403, detail="Verification failed: Invalid mode or token"
         )
+    except Exception as e:
+        logger.error("Webhook verification error: %s", str(e))
+        raise HTTPException(status_code=500, detail=str(e))
+
 
 @router.post("/webhook")
 async def webhook(request: Request, db: Session = Depends(get_db)) -> Dict[str, Any]:
     """Handle incoming WhatsApp messages"""
     try:
         body = await request.json()
-        logger.info("=== Incoming Webhook Event ===")
-        logger.info(f"Headers: {dict(request.headers)}")
-        logger.info(f"Raw Body: {json.dumps(body, indent=2)}")
+        logger.debug(f"Received webhook:\n{json.dumps(body, indent=2)}")
 
-        # Check if this is a status update
+        # Handle status updates
         if "statuses" in str(body):
-            logger.info("Received status update - skipping")
-            return {"success": True, "message": "Status update received"}
+            logger.info("Status update received")
+            return {
+                "success": True,
+                "message": "Status update received"
+            }
 
-        # Handle incoming messages
-        if "entry" in body and len(body["entry"]) > 0:
-            entry = body["entry"][0]
-            
-            if "changes" in entry and len(entry["changes"]) > 0:
-                change = entry["changes"][0]
-                
-                if "value" in change:
-                    value = change["value"]
-                    
-                    if "messages" in value and len(value["messages"]) > 0:
-                        logger.info("Valid message payload detected")
-                        
-                        try:
-                            # Extract message data
-                            message_data = extract_whatsapp_message_data(body)
-                            logger.info(f"Extracted message data: {json.dumps(message_data, indent=2)}")
+        # Handle messages
+        if is_valid_whatsapp_message(body):
+            # Let the WhatsApp bot handle the message with database session
+            result = await whatsapp_bot.handle_message(body, db)
+            return {
+                "success": True,
+                "data": result
+            }
 
-                            # Process message with WhatsApp bot
-                            result = await whatsapp_bot.handle_message(body, db)
-                            logger.info(f"Message processed successfully: {json.dumps(result)}")
-                            
-                            return {
-                                "success": True,
-                                "message": "Message processed successfully",
-                                "data": result
-                            }
-                        except Exception as e:
-                            logger.error(f"Error processing message: {str(e)}", exc_info=True)
-                            return {
-                                "success": False,
-                                "message": f"Error processing message: {str(e)}"
-                            }
-
-        logger.warning("Received webhook with unknown format")
-        logger.warning(f"Body structure: {json.dumps(body, indent=2)}")
-        return {"success": True, "message": "Webhook received but no action taken"}
+        return {
+            "success": True,
+            "message": "Webhook received"
+        }
 
     except Exception as e:
-        logger.error(f"Error in webhook: {str(e)}", exc_info=True)
-        logger.error("Full webhook payload:", exc_info=True)
-        logger.error(json.dumps(body, indent=2))
-        raise HTTPException(status_code=500, detail=str(e))
+        error_msg = str(e)
+        logger.error(f"Error processing webhook: {error_msg}")
+        raise WhatsAppError(
+            message=error_msg,
+            status_code=500
+        )
 
-async def update_message_metrics(message_id: str, status: str, db: Session):
-    """Update message metrics based on status updates"""
-    try:
-        # Find campaign message
-        campaign_message = db.query(Campaign).filter(
-            Campaign.message_id == message_id
-        ).first()
-        
-        if campaign_message:
-            if status == "sent":
-                campaign_message.sent_count += 1
-            elif status == "delivered":
-                campaign_message.delivered_count += 1
-            elif status == "read":
-                campaign_message.open_count += 1
-            
-            db.commit()
-            logger.info(f"Updated metrics for message {message_id}: {status}")
-    except Exception as e:
-        logger.error(f"Error updating message metrics: {str(e)}")
-
-async def track_message_receipt(message_data: dict, db: Session):
-    """Track received message metrics"""
-    try:
-        # Find associated campaign if this is a response
-        campaign = db.query(Campaign).filter(
-            Campaign.phone_number == message_data["from"]
-        ).order_by(Campaign.created_at.desc()).first()
-        
-        if campaign:
-            campaign.response_count += 1
-            db.commit()
-            logger.info(f"Updated response count for campaign {campaign.id}")
-    except Exception as e:
-        logger.error(f"Error tracking message receipt: {str(e)}")
 
 @router.post("/send")
 async def send_message(
@@ -461,30 +400,27 @@ async def get_templates() -> Dict[str, Any]:
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/template-content")
-async def get_template_content(
-    phone_number_id: str,
-    template_name: str,
-    current_user: Dict[str, Any] = Depends(get_current_user)
-):
+async def get_template_content(phone_number_id: str, template_name: str):
     """
     Get the content of a specific WhatsApp message template
     """
     try:
         client = WhatsAppClient()
-        content = await client.get_template_content(phone_number_id, template_name)
-        return {
-            "success": True,
-            "template": content
-        }
-    except HTTPException as e:
-        logger.error(f"HTTP error in template content: {str(e)}")
-        raise e
+        # The client now returns the processed template directly
+        template_data = await client.get_template_content(phone_number_id, template_name)
+        
+        # No need to process the data again since WhatsAppClient already does it
+        return template_data
+        
+    except HTTPException as http_error:
+        logger.error(f"HTTP error in template content: {str(http_error)}")
+        raise http_error
     except Exception as e:
-        logger.error(f"Error getting template content: {str(e)}")
+        logger.error(f"Error in get_template_content: {str(e)}")
         raise HTTPException(
             status_code=500,
-            detail=f"Failed to fetch template content: {str(e)}"
-        ) 
+            detail=f"Internal server error: {str(e)}"
+        )
 
 @router.get("/campaigns")
 async def get_campaigns(
@@ -598,7 +534,10 @@ def calculate_change(current: float, previous: float) -> float:
     return round(((current - previous) / previous) * 100, 1) 
 
 @router.post("/webhook/test")
-async def test_webhook(db: Session = Depends(get_db)):
+async def test_webhook(
+    db: Session = Depends(get_db),
+    message: str = Body("Hello, test message", embed=True)
+):
     """Test endpoint for webhook processing"""
     test_payload = {
         "object": "whatsapp_business_account",
@@ -613,17 +552,17 @@ async def test_webhook(db: Session = Depends(get_db)):
                     },
                     "contacts": [{
                         "profile": {
-                            "name": "test user name"
+                            "name": "Test User"
                         },
                         "wa_id": "16315551181"
                     }],
                     "messages": [{
                         "from": "16315551181",
-                        "id": "ABGGFlA5Fpa",
-                        "timestamp": "1504902988",
+                        "id": f"wamid.test{int(time.time())}",
+                        "timestamp": str(int(time.time())),
                         "type": "text",
                         "text": {
-                            "body": "test message"
+                            "body": message
                         }
                     }]
                 },
@@ -632,5 +571,108 @@ async def test_webhook(db: Session = Depends(get_db)):
         }]
     }
 
-    result = await webhook(Request(scope={"type": "http"}), db)
-    return result 
+    logger.info("=== TESTING WEBHOOK FLOW ===")
+    logger.info(f"Test payload:\n{json.dumps(test_payload, indent=2)}")
+    
+    # Create a proper mock request
+    class MockRequest:
+        def __init__(self, json_data):
+            self._json = json_data
+            self.headers = {
+                "content-type": "application/json",
+                "user-agent": "test-client",
+                "host": "localhost:8000"
+            }
+
+        async def json(self):
+            return self._json
+
+    # Use the mock request with proper attributes
+    mock_request = MockRequest(test_payload)
+    
+    try:
+        result = await webhook(mock_request, db)
+        logger.info(f"Test result:\n{json.dumps(result, indent=2)}")
+        return {
+            "success": True,
+            "test_payload": test_payload,
+            "result": result
+        }
+    except Exception as e:
+        logger.error(f"Test webhook error: {str(e)}", exc_info=True)
+        return {
+            "success": False,
+            "error": str(e),
+            "test_payload": test_payload
+        }
+
+@router.get("/health")
+async def health_check(
+    whatsapp_service: WhatsAppService = Depends(get_whatsapp_service),
+    db: Session = Depends(get_db)
+) -> Dict[str, Any]:
+    """Check if all services are working"""
+    status = {
+        "status": "healthy",
+        "services": {},
+        "timestamp": datetime.utcnow().isoformat()
+    }
+    
+    try:
+        # Test database connection
+        try:
+            from sqlalchemy import text
+            db.execute(text("SELECT 1"))
+            status["services"]["database"] = "connected"
+        except Exception as e:
+            logger.error(f"Database health check failed: {str(e)}")
+            status["services"]["database"] = f"error: {str(e)}"
+            status["status"] = "unhealthy"
+
+        # Test WhatsApp service
+        try:
+            await whatsapp_service.verify_token()
+            status["services"]["whatsapp"] = "connected"
+        except Exception as e:
+            logger.error(f"WhatsApp health check failed: {str(e)}")
+            status["services"]["whatsapp"] = f"error: {str(e)}"
+            status["status"] = "unhealthy"
+
+        # Test OpenAI connection and assistant
+        try:
+            openai_service = OpenAIService()
+            # Verify API key
+            response = await openai_service.client.chat.completions.create(
+                model=settings.OPENAI_MODEL,
+                messages=[{"role": "user", "content": "test"}],
+                max_tokens=5
+            )
+            
+            # Verify assistant exists
+            if not settings.OPENAI_ASSISTANT_ID:
+                raise ValueError("OPENAI_ASSISTANT_ID not configured")
+                
+            assistant = await openai_service.client.beta.assistants.retrieve(
+                assistant_id=settings.OPENAI_ASSISTANT_ID
+            )
+            
+            status["services"]["openai"] = {
+                "api": "connected",
+                "assistant": assistant.id,
+                "model": settings.OPENAI_MODEL
+            }
+            
+        except Exception as e:
+            logger.error(f"OpenAI health check failed: {str(e)}")
+            status["services"]["openai"] = f"error: {str(e)}"
+            status["status"] = "unhealthy"
+
+        return status
+
+    except Exception as e:
+        logger.error(f"Health check failed: {str(e)}", exc_info=True)
+        return {
+            "status": "unhealthy",
+            "error": str(e),
+            "timestamp": datetime.utcnow().isoformat()
+        } 

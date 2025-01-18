@@ -1,82 +1,84 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { RefreshCw } from "lucide-react"
-import { toast } from "sonner"
-import { PhoneNumberList } from "@/components/settings/phone-number-list"
-import { Breadcrumbs } from "@/components/ui/breadcrumbs"
-import type { BreadcrumbItem } from "@/components/ui/breadcrumbs"
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { RefreshCw } from "lucide-react";
+import { toast } from "sonner";
+import { PhoneNumberList } from "@/components/settings/phone-number-list";
+import { Breadcrumbs } from "@/components/ui/breadcrumbs";
+import type { BreadcrumbItem } from "@/components/ui/breadcrumbs";
 
 interface PhoneNumber {
-  id: string
-  verified_name: string
-  display_phone_number: string
-  quality_rating: string
-  code_verification_status?: string
-  whatsapp_registered: boolean
+  id: string;
+  verified_name: string;
+  display_phone_number: string;
+  quality_rating: string;
+  code_verification_status?: string;
+  whatsapp_registered: boolean;
 }
 
 const breadcrumbItems: BreadcrumbItem[] = [
   { title: "Dashboard", link: "/dashboard" },
   { title: "Settings", link: "/dashboard/settings" },
   { title: "Phone Numbers", link: "/dashboard/settings/phone-numbers" },
-]
+];
 
 export default function PhoneNumbersPage() {
-  const [loading, setLoading] = useState(true)
-  const [phoneNumbers, setPhoneNumbers] = useState<PhoneNumber[]>([])
-  const [syncing, setSyncing] = useState(false)
+  const [loading, setLoading] = useState(true);
+  const [phoneNumbers, setPhoneNumbers] = useState<PhoneNumber[]>([]);
+  const [syncing, setSyncing] = useState(false);
 
   const fetchPhoneNumbers = async () => {
     try {
-      const response = await fetch("/api/v1/whatsapp/phone-numbers")
+      const response = await fetch("/api/v1/whatsapp/phone-numbers");
       if (!response.ok) {
-        throw new Error("Failed to fetch phone numbers")
+        throw new Error("Failed to fetch phone numbers");
       }
-      const data = await response.json()
-      console.log("API Response:", data) // Debug log
+      const data = await response.json();
+      console.log("API Response:", data); // Debug log
 
       // Ensure we have an array of phone numbers
-      const numbers = Array.isArray(data) ? data : data.phone_numbers || []
+      const numbers = Array.isArray(data) ? data : data.phone_numbers || [];
 
       // For each phone number, check registration status
       const numbersWithStatus = await Promise.all(
         numbers.map(async (number: PhoneNumber) => {
           try {
-            const statusResponse = await fetch(`/api/v1/whatsapp/verify-registration?phone_number_id=${number.id}`)
-            number.whatsapp_registered = statusResponse.ok
+            const statusResponse = await fetch(
+              `/api/v1/whatsapp/verify-registration?phone_number_id=${number.id}`
+            );
+            number.whatsapp_registered = statusResponse.ok;
           } catch (error) {
-            console.error("[VERIFY_REGISTRATION]", error)
-            number.whatsapp_registered = false
+            console.error("[VERIFY_REGISTRATION]", error);
+            number.whatsapp_registered = false;
           }
-          return number
+          return number;
         })
-      )
+      );
 
-      setPhoneNumbers(numbersWithStatus)
+      setPhoneNumbers(numbersWithStatus);
     } catch (error) {
-      console.error("[PHONE_NUMBERS_FETCH]", error)
-      toast.error("Failed to fetch phone numbers")
-      setPhoneNumbers([]) // Set empty array on error
+      console.error("[PHONE_NUMBERS_FETCH]", error);
+      toast.error("Failed to fetch phone numbers");
+      setPhoneNumbers([]); // Set empty array on error
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   useEffect(() => {
-    fetchPhoneNumbers()
-  }, [])
+    fetchPhoneNumbers();
+  }, []);
 
   const handleSync = async () => {
-    setSyncing(true)
+    setSyncing(true);
     try {
-      await fetchPhoneNumbers()
-      toast.success("Phone numbers synced successfully")
+      await fetchPhoneNumbers();
+      toast.success("Phone numbers synced successfully");
     } finally {
-      setSyncing(false)
+      setSyncing(false);
     }
-  }
+  };
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -85,11 +87,7 @@ export default function PhoneNumbersPage() {
           <Breadcrumbs items={breadcrumbItems} />
           <div className="flex items-center justify-between">
             <h2 className="text-3xl font-bold tracking-tight">Phone Numbers</h2>
-            <Button
-              variant="outline"
-              onClick={handleSync}
-              disabled={syncing}
-            >
+            <Button variant="outline" onClick={handleSync} disabled={syncing}>
               {syncing ? (
                 <>
                   <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
@@ -112,9 +110,12 @@ export default function PhoneNumbersPage() {
             <RefreshCw className="h-6 w-6 animate-spin" />
           </div>
         ) : (
-          <PhoneNumberList phoneNumbers={phoneNumbers} onUpdate={fetchPhoneNumbers} />
+          <PhoneNumberList
+            phoneNumbers={phoneNumbers}
+            onUpdate={fetchPhoneNumbers}
+          />
         )}
       </div>
     </div>
-  )
-} 
+  );
+}

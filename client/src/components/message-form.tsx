@@ -59,18 +59,33 @@ interface MessageFormProps {
   onSuccess?: () => void;
 }
 
-interface TemplateComponent {
-  type: string;
-  text: string;
-  format: string;
-  example: Record<string, unknown>;
-}
-
 interface TemplateContent {
   name: string;
   language: string;
   status: string;
-  components: TemplateComponent[];
+  content: {
+    header: {
+      format: string;
+      text: string;
+    } | null;
+    body: string | null;
+    footer: string | null;
+    buttons: Array<{
+      type: string;
+      text: string;
+      url?: string;
+    }>;
+  };
+}
+
+interface TemplateVariable {
+  index: number;
+  value: string;
+}
+
+interface ColumnMapping {
+  variableIndex: number;
+  columnName: string;
 }
 
 export function MessageForm({ onSuccess }: MessageFormProps) {
@@ -86,8 +101,14 @@ export function MessageForm({ onSuccess }: MessageFormProps) {
   const [fromNumber, setFromNumber] = useState<PhoneNumber | null>(null);
   const [recipientType, setRecipientType] = useState("single"); // 'single' | 'multiple' | 'file'
   const [file, setFile] = useState<File | null>(null);
-  const [templateContent, setTemplateContent] = useState<TemplateContent | null>(null);
+  const [templateContent, setTemplateContent] =
+    useState<TemplateContent | null>(null);
   const [loadingTemplateContent, setLoadingTemplateContent] = useState(false);
+  const [templateVariables, setTemplateVariables] = useState<
+    TemplateVariable[]
+  >([]);
+  const [columnMappings, setColumnMappings] = useState<ColumnMapping[]>([]);
+  const [fileColumns, setFileColumns] = useState<string[]>([]);
 
   // Load pre-selected from number if available
   useEffect(() => {
@@ -115,9 +136,11 @@ export function MessageForm({ onSuccess }: MessageFormProps) {
   useEffect(() => {
     async function fetchTemplates() {
       if (!fromNumber?.id) return;
-      
+
       try {
-        const response = await fetch(`/api/v1/whatsapp/templates?phone_number_id=${fromNumber.id}`);
+        const response = await fetch(
+          `/api/v1/whatsapp/templates?phone_number_id=${fromNumber.id}`
+        );
         if (!response.ok) {
           throw new Error("Failed to fetch templates");
         }
@@ -139,45 +162,53 @@ export function MessageForm({ onSuccess }: MessageFormProps) {
 
   useEffect(() => {
     async function fetchTemplateContent() {
-      if (!selectedTemplate || !fromNumber?.id) return;
-      
+      if (!selectedTemplate || !fromNumber?.id) {
+        console.log("No template or fromNumber selected");
+        return;
+      }
+
       setLoadingTemplateContent(true);
       try {
+        console.log("Fetching template content for:", selectedTemplate);
         const response = await fetch(
           `/api/v1/whatsapp/template-content?phone_number_id=${fromNumber.id}&template_name=${selectedTemplate}`,
-          {
-            credentials: 'include'
-          }
+          { credentials: "include" }
         );
-        
+
         const data = await response.json();
-        console.log("Raw API Response:", data);
-        
+        console.log("Raw template response:", data);
+
         if (!response.ok) {
-          throw new Error(data.error || "Failed to fetch template content");
+          throw new Error(data.detail || "Failed to fetch template content");
         }
-        
-        // Fix: Access the nested template structure correctly
-        const templateData = data.template.template || data.template;
-        
-        const content: TemplateContent = {
-          name: templateData.name,
-          language: templateData.language,
-          status: templateData.status,
-          components: templateData.components.map((comp: TemplateComponent) => ({
-            type: comp.type.toLowerCase(),
-            text: comp.text,
-            format: comp.format?.toLowerCase() || 'text',
-            example: comp.example || {}
-          }))
-        };
-        
-        console.log("Processed template content:", content);
-        setTemplateContent(content);
+
+        // Extract the actual template content from the response
+        const templateData = data.template || data;
+        console.log("Processed template data:", templateData);
+
+        setTemplateContent(templateData);
+
+        // Extract variables from template
+        if (templateData?.content?.body) {
+          console.log("Found template body:", templateData.content.body);
+          const matches =
+            templateData.content.body.match(/\{\{(\d+)\}\}/g) || [];
+          console.log("Found variables:", matches);
+          const vars = matches.map((match: string) => ({
+            index: parseInt(match.replace(/[{}]/g, "")),
+            value: "",
+          }));
+          console.log("Setting template variables:", vars);
+          setTemplateVariables(vars);
+        }
       } catch (error) {
         console.error("[TEMPLATE_CONTENT_FETCH]", error);
-        toast.error(error instanceof Error ? error.message : "Failed to fetch template content");
-        setTemplateContent(null); // Reset on error
+        toast.error(
+          error instanceof Error
+            ? error.message
+            : "Failed to fetch template content"
+        );
+        setTemplateContent(null);
       } finally {
         setLoadingTemplateContent(false);
       }
@@ -192,12 +223,6 @@ export function MessageForm({ onSuccess }: MessageFormProps) {
 
   const currentTemplate = selectedTemplate ? templates[selectedTemplate] : null;
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setFile(e.target.files[0]);
-    }
-  };
-
   const getRecipientNumbers = (): string[] => {
     switch (recipientType) {
       case "single":
@@ -205,9 +230,11 @@ export function MessageForm({ onSuccess }: MessageFormProps) {
       case "multiple":
         return bulkNumbers
           .split("\n")
-          .map(num => num.trim())
-          .filter(num => num.length > 0)
-          .map(num => (num.startsWith("+") ? num : countryCode + num.replace(/\D/g, "")));
+          .map((num) => num.trim())
+          .filter((num) => num.length > 0)
+          .map((num) =>
+            num.startsWith("+") ? num : countryCode + num.replace(/\D/g, "")
+          );
       case "file":
         // File processing would be handled separately
         return [];
@@ -218,55 +245,42 @@ export function MessageForm({ onSuccess }: MessageFormProps) {
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!fromNumber) {
-      toast.error("Please select a from number");
-      return;
-    }
-
-    if (!selectedTemplate) {
-      toast.error("Please select a template");
-      return;
-    }
-
-    const recipients = getRecipientNumbers();
-    if (recipients.length === 0) {
-      toast.error("Please enter at least one recipient number");
-      return;
-    }
-
     setLoading(true);
+
     try {
-      const messageData = {
+      const payload = {
         campaign_name: campaignName,
-        from_number: fromNumber.id,
-        phone_number: recipients[0],
-        template_name: selectedTemplate,
+        from_number: fromNumber?.id,
+        phone_number: getRecipientNumbers()[0],
+        recipients: getRecipientNumbers(),
         use_template: true,
+        template_name: selectedTemplate,
         template: {
           name: selectedTemplate,
-          language: {
-            code: templateContent?.language || "en_US"
-          },
-          components: templateContent?.components.map((component, index) => ({
-            type: component.type.toLowerCase(),
-            parameters: [{
-              type: "text",
-              text: message.split(";")[index]?.trim() || ""
-            }]
-          })) || []
+          language: { code: templateContent?.language || "en_US" },
+          components: templateContent?.content?.body?.includes("{{")
+            ? templateVariables.map((variable) => ({
+                type: "BODY",
+                parameters: [
+                  {
+                    type: "text",
+                    text: variable.value || `[Variable ${variable.index}]`,
+                  },
+                ],
+              }))
+            : [], // Empty array for templates without variables
         },
-        recipients: recipients
       };
 
-      console.log("Sending message data:", messageData);
+      console.log("Sending message data:", payload);
 
       const response = await fetch("/api/v1/whatsapp/send", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(messageData),
-        credentials: 'include'
+        body: JSON.stringify(payload),
+        credentials: "include",
       });
 
       const data = await response.json();
@@ -277,9 +291,10 @@ export function MessageForm({ onSuccess }: MessageFormProps) {
           throw new Error("Please log in to continue");
         }
         // Handle structured error response
-        const errorMessage = typeof data.error === 'object' 
-          ? data.error.detail || JSON.stringify(data.error)
-          : data.error || "Failed to send message";
+        const errorMessage =
+          typeof data.error === "object"
+            ? data.error.detail || JSON.stringify(data.error)
+            : data.error || "Failed to send message";
         throw new Error(errorMessage);
       }
 
@@ -296,9 +311,107 @@ export function MessageForm({ onSuccess }: MessageFormProps) {
       setFile(null);
     } catch (error) {
       console.error("[SEND_MESSAGE]", error);
-      toast.error(error instanceof Error ? error.message : "Failed to send message");
+      toast.error(
+        error instanceof Error ? error.message : "Failed to send message"
+      );
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      setFile(file);
+
+      // Read CSV headers
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const text = event.target?.result as string;
+        const headers = text
+          .split("\n")[0]
+          .split(",")
+          .map((h) => h.trim());
+        setFileColumns(headers);
+      };
+      reader.readAsText(file);
+    }
+  };
+
+  const renderVariableInputs = () => {
+    if (!templateContent?.content?.body) return null;
+
+    switch (recipientType) {
+      case "single":
+      case "multiple":
+        return (
+          <div className="space-y-4">
+            <Label>Template Variables</Label>
+            {templateVariables.map((variable) => (
+              <div key={variable.index} className="space-y-2">
+                <Label>Variable {variable.index}</Label>
+                <Input
+                  value={variable.value}
+                  onChange={(e) => {
+                    const newVars = templateVariables.map((v) =>
+                      v.index === variable.index
+                        ? { ...v, value: e.target.value }
+                        : v
+                    );
+                    setTemplateVariables(newVars);
+                    setMessage(newVars.map((v) => v.value).join(";"));
+                  }}
+                  placeholder={`Enter value for variable ${variable.index}`}
+                />
+              </div>
+            ))}
+          </div>
+        );
+
+      case "file":
+        return (
+          <div className="space-y-4">
+            <Label>Map CSV Columns to Template Variables</Label>
+            {templateVariables.map((variable) => (
+              <div key={variable.index} className="space-y-2">
+                <Label>Variable {variable.index}</Label>
+                <Select
+                  value={
+                    columnMappings.find(
+                      (m) => m.variableIndex === variable.index
+                    )?.columnName
+                  }
+                  onValueChange={(value) => {
+                    const newMappings = [...columnMappings];
+                    const index = newMappings.findIndex(
+                      (m) => m.variableIndex === variable.index
+                    );
+                    if (index >= 0) {
+                      newMappings[index].columnName = value;
+                    } else {
+                      newMappings.push({
+                        variableIndex: variable.index,
+                        columnName: value,
+                      });
+                    }
+                    setColumnMappings(newMappings);
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select column" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {fileColumns.map((column) => (
+                      <SelectItem key={column} value={column}>
+                        {column}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            ))}
+          </div>
+        );
     }
   };
 
@@ -323,44 +436,50 @@ export function MessageForm({ onSuccess }: MessageFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Left Column - Form Fields */}
+        <div className="space-y-6">
+          {/* From Number Display */}
+          <div className="bg-muted/50 p-4 rounded-lg border">
+            <Label className="text-sm text-muted-foreground">
+              Sending From:
+            </Label>
+            <div className="flex items-center gap-2 mt-1">
+              <span className="font-medium">
+                {fromNumber.display_phone_number}
+              </span>
+              <Badge variant="secondary">{fromNumber.verified_name}</Badge>
+            </div>
+          </div>
 
-<div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      {/* Left Column - Form Fields */}
-      <div className="space-y-6">
-      {/* From Number Display */}
-      <div className="bg-muted/50 p-4 rounded-lg border">
-        <Label className="text-sm text-muted-foreground">Sending From:</Label>
-        <div className="flex items-center gap-2 mt-1">
-          <span className="font-medium">{fromNumber.display_phone_number}</span>
-          <Badge variant="secondary">{fromNumber.verified_name}</Badge>
-        </div>
-      </div>
+          {/* Campaign Name */}
+          <div className="space-y-2">
+            <Label htmlFor="campaign-name">Campaign Name</Label>
+            <Input
+              id="campaign-name"
+              placeholder="Enter a name for your campaign"
+              value={campaignName}
+              onChange={(e) => setCampaignName(e.target.value)}
+              required
+              className="bg-background"
+            />
+          </div>
 
-     {/* Campaign Name */}
-     <div className="space-y-2">
-        <Label htmlFor="campaign-name">Campaign Name</Label>
-        <Input
-          id="campaign-name"
-          placeholder="Enter a name for your campaign"
-          value={campaignName}
-          onChange={(e) => setCampaignName(e.target.value)}
-          required
-          className="bg-background"
-        />
-      </div>
-
-      
-        
           {/* Recipient Selection */}
           <div className="space-y-4">
             <Label>Recipients</Label>
-            <Tabs defaultValue="single" value={recipientType} onValueChange={setRecipientType} className="w-full">
+            <Tabs
+              defaultValue="single"
+              value={recipientType}
+              onValueChange={setRecipientType}
+              className="w-full"
+            >
               <TabsList className="grid w-full grid-cols-3">
                 <TabsTrigger value="single">Single</TabsTrigger>
                 <TabsTrigger value="multiple">Multiple</TabsTrigger>
                 <TabsTrigger value="file">File Upload</TabsTrigger>
               </TabsList>
-              
+
               <TabsContent value="single" className="space-y-4">
                 <div className="flex gap-2">
                   <div className="w-32">
@@ -370,9 +489,14 @@ export function MessageForm({ onSuccess }: MessageFormProps) {
                       </SelectTrigger>
                       <SelectContent>
                         {countryCodes.map((country) => (
-                          <SelectItem key={country.code} value={`+${country.code}`}>
+                          <SelectItem
+                            key={country.code}
+                            value={`+${country.code}`}
+                          >
                             <div className="flex flex-col">
-                              <span className="font-medium">+{country.code}</span>
+                              <span className="font-medium">
+                                +{country.code}
+                              </span>
                               <span className="text-muted-foreground text-xs">
                                 {country.country}
                               </span>
@@ -403,7 +527,7 @@ export function MessageForm({ onSuccess }: MessageFormProps) {
                   </div>
                 </div>
               </TabsContent>
-              
+
               <TabsContent value="multiple">
                 <Textarea
                   placeholder="Enter multiple numbers (one per line)"
@@ -414,16 +538,17 @@ export function MessageForm({ onSuccess }: MessageFormProps) {
                   className="bg-background resize-none"
                 />
                 <p className="text-sm text-muted-foreground mt-2">
-                  Enter one number per line. Country code will be added automatically if not provided.
+                  Enter one number per line. Country code will be added
+                  automatically if not provided.
                 </p>
               </TabsContent>
-              
+
               <TabsContent value="file">
                 <div className="flex flex-col items-center justify-center p-8 border-2 border-dashed rounded-lg bg-muted/50">
                   <Input
                     type="file"
-                    accept=".csv,.xlsx,.xls"
-                    onChange={handleFileChange}
+                    accept=".csv"
+                    onChange={handleFileUpload}
                     required={recipientType === "file"}
                     className="hidden"
                     id="file-upload"
@@ -448,51 +573,65 @@ export function MessageForm({ onSuccess }: MessageFormProps) {
           {/* Template Selection and Parameters */}
           <div className="space-y-4">
             <Label>Message Template</Label>
-            <Select value={selectedTemplate} onValueChange={setSelectedTemplate}>
+            <Select
+              value={selectedTemplate}
+              onValueChange={setSelectedTemplate}
+            >
               <SelectTrigger className="bg-background">
                 <SelectValue placeholder="Select template" />
               </SelectTrigger>
               <SelectContent>
-                {Object.entries(templates).map(([key, template]: [string, Template]) => (
-                  <SelectItem key={key} value={key}>
-                    <div className="flex items-center gap-2">
-                      <span>{template.name}</span>
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Info className="h-4 w-4 text-muted-foreground" />
-                          </TooltipTrigger>
-                          <TooltipContent className="w-80 p-2">
-                            <p className="font-medium mb-1">Template Details:</p>
-                            <p>Category: {template.category}</p>
-                            <p>Language: {template.language}</p>
-                            {template.variables_count > 0 && (
-                              <p>Variables Required: {template.variables_count}</p>
-                            )}
-                            <div className="mt-2 pt-2 border-t">
-                              <p className="font-medium mb-1">Template Structure:</p>
-                              {template.parameters.map((param: TemplateParameter, index: number) => (
-                                <div key={index} className="text-sm">
-                                  <p className="text-muted-foreground">
-                                    {param.type}:
-                                  </p>
-                                  <p className="font-mono text-xs bg-muted p-1 rounded mt-1">
-                                    {param.text}
-                                  </p>
-                                  {param.example && (
-                                    <p className="text-xs text-muted-foreground mt-1">
-                                      Example: {JSON.stringify(param.example)}
-                                    </p>
-                                  )}
-                                </div>
-                              ))}
-                            </div>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
-                    </div>
-                  </SelectItem>
-                ))}
+                {Object.entries(templates).map(
+                  ([key, template]: [string, Template]) => (
+                    <SelectItem key={key} value={key}>
+                      <div className="flex items-center gap-2">
+                        <span>{template.name}</span>
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Info className="h-4 w-4 text-muted-foreground" />
+                            </TooltipTrigger>
+                            <TooltipContent className="w-80 p-2">
+                              <p className="font-medium mb-1">
+                                Template Details:
+                              </p>
+                              <p>Category: {template.category}</p>
+                              <p>Language: {template.language}</p>
+                              {template.variables_count > 0 && (
+                                <p>
+                                  Variables Required: {template.variables_count}
+                                </p>
+                              )}
+                              <div className="mt-2 pt-2 border-t">
+                                <p className="font-medium mb-1">
+                                  Template Structure:
+                                </p>
+                                {template.parameters.map(
+                                  (param: TemplateParameter, index: number) => (
+                                    <div key={index} className="text-sm">
+                                      <p className="text-muted-foreground">
+                                        {param.type}:
+                                      </p>
+                                      <p className="font-mono text-xs bg-muted p-1 rounded mt-1">
+                                        {param.text}
+                                      </p>
+                                      {param.example && (
+                                        <p className="text-xs text-muted-foreground mt-1">
+                                          Example:{" "}
+                                          {JSON.stringify(param.example)}
+                                        </p>
+                                      )}
+                                    </div>
+                                  )
+                                )}
+                              </div>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </div>
+                    </SelectItem>
+                  )
+                )}
               </SelectContent>
             </Select>
 
@@ -502,45 +641,74 @@ export function MessageForm({ onSuccess }: MessageFormProps) {
                 <div className="grid gap-4 md:grid-cols-2">
                   {/* Left Column - Template Structure */}
                   <div className="space-y-4">
-                    <div className="bg-muted/50 p-4 rounded-md text-sm border">
-                      <p className="font-medium mb-3">Template Structure:</p>
-                      {currentTemplate.parameters.map((param: TemplateParameter, index: number) => (
-                        <div key={index} className="mb-4 last:mb-0">
-                          <div className="flex items-center gap-2">
-                            <p className="text-muted-foreground capitalize font-medium">
-                              {param.type}:
-                            </p>
-                            {param.type.toLowerCase() === "header" && (
-                              <p className="text-xs text-yellow-600">
-                                (max 60 characters)
-                              </p>
-                            )}
-                          </div>
-                          <p className="font-mono bg-background p-2 rounded mt-1 text-sm">
-                            {param.text}
+                    {templateContent?.content && (
+                      <div className="space-y-4">
+                        <div className="bg-muted/50 p-4 rounded-md text-sm border">
+                          <p className="font-medium mb-3">
+                            Template Structure:
                           </p>
-                        </div>
-                      ))}
-                    </div>
-
-                    <div className="bg-muted/50 p-4 rounded-md text-sm border">
-                      <p className="font-medium mb-3">Required Variables:</p>
-                      {currentTemplate.parameters.map((param: TemplateParameter, i: number) => (
-                        <div key={i} className="flex items-center gap-2 mb-2 last:mb-0">
-                          <span className="text-sm font-mono bg-muted px-2 py-0.5 rounded">
-                            {i + 1}
-                          </span>
-                          <span className="text-sm">
-                            Goes into <span className="font-medium">{param.type.toLowerCase()}</span>
-                          </span>
-                          {param.example && (
-                            <span className="text-xs text-muted-foreground">
-                              (e.g., {param.example.text})
-                            </span>
+                          {templateContent.content.header && (
+                            <div className="mb-4">
+                              <div className="flex items-center gap-2">
+                                <p className="text-muted-foreground capitalize font-medium">
+                                  Header:
+                                </p>
+                                <p className="text-xs text-yellow-600">
+                                  (max 60 characters)
+                                </p>
+                              </div>
+                              <p className="font-mono bg-background p-2 rounded mt-1 text-sm">
+                                {templateContent.content.header.text}
+                              </p>
+                            </div>
+                          )}
+                          {templateContent.content.body && (
+                            <div className="mb-4">
+                              <p className="text-muted-foreground capitalize font-medium">
+                                Body:
+                              </p>
+                              <p className="font-mono bg-background p-2 rounded mt-1 text-sm">
+                                {templateContent.content.body}
+                              </p>
+                            </div>
+                          )}
+                          {templateContent.content.footer && (
+                            <div className="mb-4">
+                              <p className="text-muted-foreground capitalize font-medium">
+                                Footer:
+                              </p>
+                              <p className="font-mono bg-background p-2 rounded mt-1 text-sm">
+                                {templateContent.content.footer}
+                              </p>
+                            </div>
                           )}
                         </div>
-                      ))}
-                    </div>
+
+                        {templateContent.content.body?.includes("{{") && (
+                          <div className="bg-muted/50 p-4 rounded-md text-sm border">
+                            <p className="font-medium mb-3">
+                              Required Variables:
+                            </p>
+                            {templateContent.content.body
+                              .match(/\{\{(\d+)\}\}/g)
+                              ?.map((variable, i) => (
+                                <div
+                                  key={i}
+                                  className="flex items-center gap-2 mb-2 last:mb-0"
+                                >
+                                  <span className="text-sm font-mono bg-muted px-2 py-0.5 rounded">
+                                    {variable.replace(/[{}]/g, "")}
+                                  </span>
+                                  <span className="text-sm">
+                                    Goes into{" "}
+                                    <span className="font-medium">body</span>
+                                  </span>
+                                </div>
+                              ))}
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
 
                   {/* Right Column - Preview */}
@@ -548,29 +716,70 @@ export function MessageForm({ onSuccess }: MessageFormProps) {
                     <div className="bg-muted/50 p-4 rounded-md text-sm border">
                       <p className="font-medium mb-3">Message Preview:</p>
                       <div className="bg-background rounded-lg p-4 space-y-3">
-                        {(templateContent?.components?.length ?? 0) > 0 ? (
-                          (templateContent as TemplateContent).components.map((component: TemplateComponent, index: number) => {
-                            const value = message.split(";")[index]?.trim() || "";
-                            return (
-                              <div key={index} className="space-y-1">
-                                <p className="text-xs font-medium text-muted-foreground uppercase">
-                                  {component.type}
+                        {templateContent?.content ? (
+                          <div className="max-w-[80%] ml-auto">
+                            <div className="bg-[#DCF8C6] rounded-lg p-3 shadow-sm space-y-2">
+                              {templateContent.content.header && (
+                                <p className="text-sm font-bold break-words">
+                                  {templateContent.content.header.text}
                                 </p>
-                                <p className="font-medium">
-                                  {value ? component.text.replace(/\{\{[^}]+\}\}/, value) : component.text}
+                              )}
+                              {templateContent.content.body && (
+                                <p className="text-sm break-words">
+                                  {templateContent.content.body.replace(
+                                    /\{\{(\d+)\}\}/g,
+                                    (_: string, index: string) => {
+                                      const variable = templateVariables.find(
+                                        (v) => v.index === parseInt(index)
+                                      );
+                                      return (
+                                        variable?.value || `[Variable ${index}]`
+                                      );
+                                    }
+                                  )}
                                 </p>
-                              </div>
-                            );
-                          })
+                              )}
+                              {templateContent.content.footer && (
+                                <p className="text-xs text-gray-600 mt-2 break-words">
+                                  {templateContent.content.footer}
+                                </p>
+                              )}
+                              {templateContent.content.buttons.length > 0 && (
+                                <div className="mt-2 pt-2 border-t border-black/10">
+                                  {templateContent.content.buttons.map(
+                                    (button, index) => (
+                                      <div
+                                        key={index}
+                                        className="text-blue-600 text-sm cursor-pointer hover:underline"
+                                      >
+                                        {button.text}
+                                      </div>
+                                    )
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                            <div className="text-[10px] text-gray-500 text-right mt-1">
+                              {new Date().toLocaleTimeString([], {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              })}
+                            </div>
+                          </div>
                         ) : (
-                          <p className="text-muted-foreground">No template content available</p>
+                          <div className="text-center text-muted-foreground p-4">
+                            Select a template to see preview
+                          </div>
                         )}
                       </div>
                     </div>
 
                     <Textarea
                       placeholder={`Enter values in order: ${currentTemplate.parameters
-                        .map((param: TemplateParameter, i: number) => `${i + 1}. ${param.type.toLowerCase()}`)
+                        .map(
+                          (param: TemplateParameter, i: number) =>
+                            `${i + 1}. ${param.type.toLowerCase()}`
+                        )
                         .join("; ")}`}
                       value={message}
                       onChange={(e) => setMessage(e.target.value)}
@@ -580,14 +789,19 @@ export function MessageForm({ onSuccess }: MessageFormProps) {
                     />
                     <div className="text-xs text-muted-foreground">
                       <p className="text-yellow-600 mb-1">
-                        Note: Enter values in order, separated by semicolons (;).
-                        {currentTemplate.parameters.some(p => p.type.toLowerCase() === "header") && 
-                          " Header text cannot exceed 60 characters."
-                        }
+                        Note: Enter values in order, separated by semicolons
+                        (;).
+                        {currentTemplate.parameters.some(
+                          (p) => p.type.toLowerCase() === "header"
+                        ) && " Header text cannot exceed 60 characters."}
                       </p>
                       <p>
-                        Example: {currentTemplate.parameters
-                          .map((param: TemplateParameter) => param.example?.text || `[${param.type}]`)
+                        Example:{" "}
+                        {currentTemplate.parameters
+                          .map(
+                            (param: TemplateParameter) =>
+                              param.example?.text || `[${param.type}]`
+                          )
                           .join(" ; ")}
                       </p>
                     </div>
@@ -612,51 +826,69 @@ export function MessageForm({ onSuccess }: MessageFormProps) {
                 <div className="flex flex-col h-full">
                   {/* WhatsApp Header */}
                   <div className="bg-[#128C7E] text-white p-4">
-                    <div className="text-sm font-medium">{fromNumber?.verified_name}</div>
-                    <div className="text-xs opacity-80">{fromNumber?.display_phone_number}</div>
+                    <div className="text-sm font-medium">
+                      {fromNumber?.verified_name}
+                    </div>
+                    <div className="text-xs opacity-80">
+                      {fromNumber?.display_phone_number}
+                    </div>
                   </div>
 
                   {/* WhatsApp Chat */}
                   <div className="flex-1 bg-[#E5DDD5] p-4 space-y-4 overflow-y-auto">
-                    
                     {loadingTemplateContent ? (
                       <div className="text-center text-muted-foreground p-4">
                         <Loader2 className="h-4 w-4 animate-spin mx-auto mb-2" />
                         Loading template...
                       </div>
-                    ) : templateContent?.components ? (
+                    ) : templateContent?.content ? (
                       <div className="max-w-[80%] ml-auto">
                         <div className="bg-[#DCF8C6] rounded-lg p-3 shadow-sm space-y-2">
-                          {templateContent.components.map((component, index) => {
-                            console.log("Rendering component:", component);
-                            
-                            switch(component.type.toLowerCase()) {
-                              case "header":
-                                return (
-                                  <p key={index} className="text-sm font-bold break-words">
-                                    {component.text}
-                                  </p>
-                                );
-                              case "body":
-                                return (
-                                  <p key={index} className="text-sm break-words">
-                                    {component.text}
-                                  </p>
-                                );
-                              case "footer":
-                                return (
-                                  <p key={index} className="text-xs text-gray-600 mt-2 break-words">
-                                    {component.text}
-                                  </p>
-                                );
-                              default:
-                                console.log("Unknown component type:", component.type);
-                                return null;
-                            }
-                          })}
+                          {templateContent.content.header && (
+                            <p className="text-sm font-bold break-words">
+                              {templateContent.content.header.text}
+                            </p>
+                          )}
+                          {templateContent.content.body && (
+                            <p className="text-sm break-words">
+                              {templateContent.content.body.replace(
+                                /\{\{(\d+)\}\}/g,
+                                (_: string, index: string) => {
+                                  const variable = templateVariables.find(
+                                    (v) => v.index === parseInt(index)
+                                  );
+                                  return (
+                                    variable?.value || `[Variable ${index}]`
+                                  );
+                                }
+                              )}
+                            </p>
+                          )}
+                          {templateContent.content.footer && (
+                            <p className="text-xs text-gray-500">
+                              {templateContent.content.footer}
+                            </p>
+                          )}
+                          {templateContent.content.buttons.length > 0 && (
+                            <div className="mt-2 pt-2 border-t border-black/10">
+                              {templateContent.content.buttons.map(
+                                (button, index) => (
+                                  <div
+                                    key={index}
+                                    className="text-blue-600 text-sm cursor-pointer hover:underline"
+                                  >
+                                    {button.text}
+                                  </div>
+                                )
+                              )}
+                            </div>
+                          )}
                         </div>
                         <div className="text-[10px] text-gray-500 text-right mt-1">
-                          {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                          {new Date().toLocaleTimeString([], {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
                         </div>
                       </div>
                     ) : (
@@ -670,7 +902,11 @@ export function MessageForm({ onSuccess }: MessageFormProps) {
                   <div className="bg-[#F0F2F5] p-3 flex items-center gap-2">
                     <div className="flex-1 bg-white rounded-full h-10"></div>
                     <div className="w-10 h-10 rounded-full bg-[#128C7E] flex items-center justify-center">
-                      <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                      <svg
+                        className="w-5 h-5 text-white"
+                        fill="currentColor"
+                        viewBox="0 0 24 24"
+                      >
                         <path d="M3.478 2.405a.75.75 0 00-.926.94l2.432 7.905H13.5a.75.75 0 010 1.5H4.984l-2.432 7.905a.75.75 0 00.926.94 60.519 60.519 0 0018.445-8.986.75.75 0 000-1.218A60.517 60.517 0 003.478 2.405z" />
                       </svg>
                     </div>
@@ -681,6 +917,40 @@ export function MessageForm({ onSuccess }: MessageFormProps) {
           </div>
         </div>
       </div>
+
+      {templateContent?.content?.body && (
+        <div className="mt-4 space-y-2">
+          <Label>Template Variables</Label>
+          <div className="text-sm text-muted-foreground mb-2">
+            Enter values separated by semicolons (;) in order:
+          </div>
+          <Textarea
+            placeholder="Enter variable values..."
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            className="min-h-[100px]"
+          />
+          <div className="text-xs text-muted-foreground">
+            {templateContent.content.body
+              .match(/\{\{(\d+)\}\}/g)
+              ?.map((variable, index) => (
+                <div key={index} className="flex items-center gap-2">
+                  <span className="font-mono bg-muted px-1 rounded">
+                    Variable {variable.replace(/[{}]/g, "")}
+                  </span>
+                  <span>→</span>
+                  <span className="italic">
+                    {message.split(";")[index]?.trim() || "[Not set]"}
+                  </span>
+                </div>
+              ))}
+          </div>
+        </div>
+      )}
+
+      {templateContent?.content?.body &&
+        templateContent?.content?.body?.includes("{{") &&
+        renderVariableInputs()}
 
       <Button type="submit" disabled={loading} className="w-full">
         {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

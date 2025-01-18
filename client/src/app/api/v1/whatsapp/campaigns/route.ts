@@ -1,5 +1,4 @@
-
-import { auth } from "@/auth"
+import { auth } from "@/auth";
 import { NextResponse } from "next/server";
 
 export async function GET() {
@@ -7,20 +6,19 @@ export async function GET() {
     const session = await auth();
 
     if (!session) {
-      return new NextResponse(
-        JSON.stringify({ error: "Unauthorized" }), 
-        { status: 401 }
-      );
+      return new NextResponse(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+      });
     }
 
-    const apiUrl = process.env.API_URL
+    const apiUrl = process.env.API_URL;
     if (!apiUrl) {
-      throw new Error("API_URL not configured")
+      throw new Error("API_URL not configured");
     }
 
     const response = await fetch(`${apiUrl}/api/v1/whatsapp/campaigns`, {
       headers: {
-        "Authorization": `Bearer ${process.env.API_KEY}`,
+        Authorization: `Bearer ${process.env.API_KEY}`,
         "Content-Type": "application/json",
       },
     });
@@ -31,12 +29,11 @@ export async function GET() {
 
     const data = await response.json();
     return NextResponse.json(data);
-
   } catch (error) {
     console.error("Error fetching campaigns:", error);
     return new NextResponse(
-      JSON.stringify({ error: "Failed to fetch campaigns" }), 
+      JSON.stringify({ error: "Failed to fetch campaigns" }),
       { status: 500 }
     );
   }
-} 
+}

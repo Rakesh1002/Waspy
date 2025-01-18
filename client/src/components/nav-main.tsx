@@ -1,57 +1,59 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import Link from "next/link"
-import { usePathname } from "next/navigation"
-import { ChevronRight, type LucideIcon } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
-import { useSidebar } from "@/components/ui/sidebar"
-import { cn } from "@/lib/utils"
+import * as React from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { ChevronRight, type LucideIcon } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+import { useSidebar } from "@/components/ui/sidebar";
+import { cn } from "@/lib/utils";
 
 interface NavItem {
-  title: string
-  url: string
-  icon: LucideIcon
-  items?: NavSubItem[]
-  isActive?: boolean
+  title: string;
+  url: string;
+  icon: LucideIcon;
+  items?: NavSubItem[];
+  isActive?: boolean;
 }
 
 interface NavSubItem {
-  title: string
-  url: string
-  icon?: LucideIcon
+  title: string;
+  url: string;
+  icon?: LucideIcon;
 }
 
 interface NavMainProps {
-  items: NavItem[]
+  items: NavItem[];
 }
 
 export function NavMain({ items }: NavMainProps) {
-  const pathname = usePathname()
-  const { open, isMobile, toggleSidebar } = useSidebar()
-  const [openGroups, setOpenGroups] = React.useState<string[]>([])
+  const pathname = usePathname();
+  const { open, isMobile, toggleSidebar } = useSidebar();
+  const [openGroups, setOpenGroups] = React.useState<string[]>([]);
 
   const toggleGroup = (title: string) => {
     if (open) {
-      setOpenGroups(prev => 
-        prev.includes(title) 
-          ? prev.filter(t => t !== title)
+      setOpenGroups((prev) =>
+        prev.includes(title)
+          ? prev.filter((t) => t !== title)
           : [...prev, title]
-      )
+      );
     }
-  }
+  };
 
   const handleLinkClick = React.useCallback(() => {
     if (isMobile && open) {
-      toggleSidebar()
+      toggleSidebar();
     }
-  }, [isMobile, open, toggleSidebar])
+  }, [isMobile, open, toggleSidebar]);
 
   return (
-    <div className={cn(
-      "flex flex-col gap-1 py-2",
-    )}>
+    <div className={cn("flex flex-col gap-1 py-2")}>
       {items.map((item) => (
         <div key={item.url}>
           {item.items ? (
@@ -65,7 +67,8 @@ export function NavMain({ items }: NavMainProps) {
                   className={cn(
                     "w-full",
                     open ? "justify-between px-4" : "justify-center p-2",
-                    (pathname.startsWith(item.url) || item.isActive) && "bg-muted"
+                    (pathname.startsWith(item.url) || item.isActive) &&
+                      "bg-muted"
                   )}
                   title={!open ? item.title : undefined}
                 >
@@ -74,10 +77,12 @@ export function NavMain({ items }: NavMainProps) {
                     {open && <span className="truncate">{item.title}</span>}
                   </div>
                   {open && (
-                    <ChevronRight className={cn(
-                      "h-4 w-4 shrink-0 transition-transform duration-200",
-                      openGroups.includes(item.title) && "rotate-90"
-                    )} />
+                    <ChevronRight
+                      className={cn(
+                        "h-4 w-4 shrink-0 transition-transform duration-200",
+                        openGroups.includes(item.title) && "rotate-90"
+                      )}
+                    />
                   )}
                 </Button>
               </CollapsibleTrigger>
@@ -122,5 +127,5 @@ export function NavMain({ items }: NavMainProps) {
         </div>
       ))}
     </div>
-  )
+  );
 }

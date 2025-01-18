@@ -42,71 +42,62 @@ def log_http_response(response: Any) -> None:
 
 
 def is_valid_whatsapp_message(body: Dict[str, Any]) -> bool:
-    """Validate if the webhook payload contains a valid WhatsApp message."""
+    """Check if the incoming webhook event has a valid WhatsApp message structure.
+    """
+    return (
+        body.get("object")
+        and body.get("entry")
+        and body["entry"][0].get("changes")
+        and body["entry"][0]["changes"][0].get("value")
+        and body["entry"][0]["changes"][0]["value"].get("messages")
+        and body["entry"][0]["changes"][0]["value"]["messages"][0]
+    )
+
+
+def extract_whatsapp_message_data(body: dict) -> dict:
+    """Extract message data from WhatsApp webhook body."""
     try:
-        logger.info("Validating WhatsApp message payload:")
-        logger.info(json.dumps(body, indent=2))
-
-        # Check for entry array
-        entries = body.get("entry", [])
-        if not entries:
-            logger.error("No entries found in webhook payload")
-            return False
-
-        # Get the first entry
-        entry = entries[0]
-        changes = entry.get("changes", [])
-        if not changes:
-            logger.error("No changes found in entry")
-            return False
-
-        # Get the first change
-        change = changes[0]
-        value = change.get("value", {})
-        
-        # Check for messages array
-        messages = value.get("messages", [])
-        if not messages:
-            logger.error("No messages found in value")
-            return False
-
-        logger.info("✅ Valid WhatsApp message payload")
-        return True
-
-    except Exception as e:
-        logger.error(f"Error validating WhatsApp message: {str(e)}")
-        return False
-
-
-def extract_whatsapp_message_data(body: Dict[str, Any]) -> Dict[str, Any]:
-    """Extract relevant data from WhatsApp webhook payload."""
-    try:
-        logger.info("Extracting message data from payload:")
-        logger.info(json.dumps(body, indent=2))
-
-        # Get the message from the webhook payload
         entry = body["entry"][0]
-        change = entry["changes"][0]
-        value = change["value"]
-        message = value["messages"][0]
+        changes = entry["changes"][0]
+        value = changes["value"]
+        
+        # Extract contact info
         contact = value["contacts"][0]
-
-        # Extract message data
+        wa_id = contact["wa_id"]
+        name = contact["profile"]["name"]
+        
+        message = value["messages"][0]
+        
+        # Get basic message info
         message_data = {
             "from": message["from"],
-            "wa_id": contact["wa_id"],
-            "name": contact["profile"]["name"],
+            "wa_id": wa_id,
+            "name": name,
             "message_id": message["id"],
             "timestamp": message["timestamp"],
-            "type": message["type"],
-            "message": message["text"]["body"] if message["type"] == "text" else "",
+            "type": message["type"]
         }
-
-        logger.info("Extracted message data:")
-        logger.info(json.dumps(message_data, indent=2))
-
+        
+        # Handle different message types
+        if message["type"] == "text":
+            message_data["message"] = message["text"]["body"]
+        elif message["type"] == "audio":
+            message_data["message"] = "[Audio Message]"
+            message_data["audio"] = message["audio"]
+        elif message["type"] == "image":
+            message_data["message"] = "[Image Message]"
+            message_data["image"] = message["image"]
+        elif message["type"] == "video":
+            message_data["message"] = "[Video Message]"
+            message_data["video"] = message["video"]
+        elif message["type"] == "document":
+            message_data["message"] = "[Document Message]"
+            message_data["document"] = message["document"]
+        else:
+            message_data["message"] = f"[{message['type'].title()} Message]"
+            
         return message_data
-
-    except Exception as e:
-        logger.error(f"Error extracting message data: {str(e)}", exc_info=True)
-        raise
+        
+    except KeyError as e:
+        logger.error(f"Error extracting WhatsApp message data: {e}")
+        raise ValueError("Invalid message format") from e

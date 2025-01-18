@@ -1,6 +1,6 @@
-"use client"
+"use client";
 
-import * as React from "react"
+import * as React from "react";
 import {
   BookOpen,
   Bot,
@@ -10,13 +10,13 @@ import {
   PieChart,
   Send,
   Settings2,
-} from "lucide-react"
-import { useSession } from "next-auth/react"
-import Image from "next/image"
-import { NavMain } from "@/components/nav-main"
-import { NavProjects } from "@/components/nav-projects"
-import { NavSecondary } from "@/components/nav-secondary"
-import { NavUser } from "@/components/nav-user"
+} from "lucide-react";
+import { useSession } from "next-auth/react";
+import Image from "next/image";
+import { NavMain } from "@/components/nav-main";
+import { NavProjects } from "@/components/nav-projects";
+import { NavSecondary } from "@/components/nav-secondary";
+import { NavUser } from "@/components/nav-user";
 import {
   Sidebar,
   SidebarContent,
@@ -25,7 +25,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "@/components/ui/sidebar"
+} from "@/components/ui/sidebar";
 
 const data = {
   navMain: [
@@ -129,16 +129,16 @@ const data = {
       icon: Map,
     },
   ],
-}
+};
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const { data: session } = useSession()
-  
+  const { data: session } = useSession();
+
   const userData = {
     name: session?.user?.name || "Guest",
     email: session?.user?.email || "",
     avatar: session?.user?.image || "",
-  }
+  };
 
   return (
     <Sidebar variant="inset" {...props}>
@@ -146,18 +146,15 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
-              
               <a href="/dashboard" className="flex items-center space-x-2">
-          <Image
-            src="/logo.svg"
-            alt="WASPY"
-            width={120}
-            height={40}
-            className="dark:invert" // Inverts colors in dark mode
-          />
-        
-                
-                </a>
+                <Image
+                  src="/logo.svg"
+                  alt="WASPY"
+                  width={120}
+                  height={40}
+                  className="dark:invert" // Inverts colors in dark mode
+                />
+              </a>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
@@ -171,5 +168,5 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavUser user={userData} />
       </SidebarFooter>
     </Sidebar>
-  )
+  );
 }

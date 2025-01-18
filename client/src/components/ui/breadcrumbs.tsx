@@ -36,4 +36,4 @@ export function Breadcrumbs({ items }: BreadcrumbsProps) {
       </ol>
     </nav>
   );
-} 
+}

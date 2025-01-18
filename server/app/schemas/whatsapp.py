@@ -1,4 +1,4 @@
-from typing import Dict, Optional, Literal, List
+from typing import Dict, Optional, Literal, List, Any
 
 from pydantic import BaseModel
 
@@ -35,3 +35,21 @@ class VerificationCode(BaseModel):
     phone_number: str
     cc: str
     code: str
+
+class WhatsAppWebhookChange(BaseModel):
+    field: str
+    value: Dict[str, Any]
+
+class WhatsAppWebhookEntry(BaseModel):
+    id: str
+    time: int
+    changes: List[WhatsAppWebhookChange]
+
+class WhatsAppWebhookPayload(BaseModel):
+    object: str
+    entry: List[WhatsAppWebhookEntry]
+
+class WhatsAppVerification(BaseModel):
+    mode: str
+    token: str
+    challenge: str

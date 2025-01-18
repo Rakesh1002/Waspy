@@ -29,49 +29,31 @@ class WhatsAppBot:
         }
 
     async def handle_message(self, body: Dict[Any, Any], db: Session) -> Dict[str, Any]:
+        """Handle incoming WhatsApp messages with AI responses"""
         try:
-            logger.info("🔄 Starting message handling process")
-            logger.info(f"Incoming message body: {json.dumps(body, indent=2)}")
-
             if not is_valid_whatsapp_message(body):
-                logger.error("❌ Invalid message format received")
                 raise ValueError("Invalid WhatsApp message format")
 
             # Extract message data
             message_data = extract_whatsapp_message_data(body)
-            logger.info(f"📩 Extracted message data: {json.dumps(message_data)}")
 
-            # Send typing indicator
-            try:
-                await self.send_typing_indicator(message_data["wa_id"])
-                logger.info("✓ Sent typing indicator")
-            except Exception as e:
-                logger.warning(f"Could not send typing indicator: {str(e)}")
-
-            # Generate AI response
-            logger.info(f"🤖 Generating AI response for user {message_data['wa_id']}")
+            # Generate AI response with database context
             response = await self.openai.generate_response(
                 message=message_data["message"],
                 user_id=message_data["wa_id"],
                 db=db,
                 context="support",
             )
-            logger.info(f"✓ Generated AI response: {response}")
 
-            # Format and send response
+            # Format response for WhatsApp
             formatted_response = process_text_for_whatsapp(response)
-            logger.info(f"📝 Formatted response: {formatted_response}")
 
-            try:
-                await self.send_message(
-                    recipient=message_data["wa_id"],
-                    message=formatted_response,
-                    use_template=False,
-                )
-                logger.info("✅ Successfully sent response to WhatsApp")
-            except Exception as e:
-                logger.error(f"❌ Failed to send WhatsApp response: {str(e)}", exc_info=True)
-                raise
+            # Send the response as a regular text message
+            await self.send_message(
+                recipient=message_data["wa_id"],
+                message=formatted_response,
+                use_template=False,
+            )
 
             return {
                 "status": "success",
@@ -79,61 +61,95 @@ class WhatsAppBot:
                 "recipient": message_data["name"],
             }
 
+        except ValueError as e:
+            logger.error(f"Validation error: {str(e)}")
+            raise HTTPException(status_code=400, detail=str(e))
         except Exception as e:
-            logger.error(f"❌ Error in handle_message: {str(e)}", exc_info=True)
-            raise
+            logger.error(f"Error handling message: {str(e)}")
+            raise HTTPException(status_code=500, detail=str(e))
 
     async def send_message(
         self,
         recipient: str,
         message: str,
-        use_template: bool = False,
-        template_name: str = None,
+        use_template: bool = True,
+        template_name: str = "hello_world",
     ) -> None:
         """Send message to WhatsApp recipient."""
         try:
-            logger.info(f"🚀 Sending message to {recipient}")
-            logger.info(f"Message content: {message}")
-
             recipient = recipient.strip().replace(" ", "")
             if not recipient.startswith("+"):
                 recipient = f"+{recipient}"
 
             url = f"{self.base_url}/{self.phone_number_id}/messages"
-            
-            logger.debug(f"WhatsApp API URL: {url}")
-            logger.debug(f"Headers: {json.dumps(self.headers)}")
-
-            data = {
-                "messaging_product": "whatsapp",
-                "recipient_type": "individual",
-                "to": recipient,
-                "type": "text",
-                "text": {"preview_url": False, "body": message},
+            headers = {
+                "Authorization": f"Bearer {self.whatsapp_token}",
+                "Content-Type": "application/json",
             }
-            
-            logger.info(f"Request payload: {json.dumps(data, indent=2)}")
 
-            async with httpx.AsyncClient() as client:
-                response = await client.post(
-                    url,
-                    headers=self.headers,
-                    json=data,
-                    timeout=10.0
-                )
-                response.raise_for_status()
-                
-                logger.info(f"WhatsApp API Response: {response.text}")
-                logger.info(f"✅ Message sent successfully to {recipient}")
+            if use_template:
+                templates = await self.get_templates()
+                template = templates.get(template_name)
 
-        except httpx.HTTPError as e:
-            logger.error(f"❌ HTTP error sending message: {str(e)}")
-            if hasattr(e, "response"):
-                logger.error(f"Response: {e.response.text}")
-            raise
-        except Exception as e:
-            logger.error(f"❌ Error sending message: {str(e)}", exc_info=True)
-            raise
+                if not template:
+                    raise HTTPException(
+                        status_code=400, detail="Template %s not found" % template_name
+                    )
+
+                data = {
+                    "messaging_product": "whatsapp",
+                    "to": recipient,
+                    "type": "template",
+                    "template": {
+                        "name": template_name,
+                        "language": {"code": template.get("language", "en")},
+                    },
+                }
+
+                # Handle template variables
+                if message and template.get("variables_count", 0) > 0:
+                    variables = message.split(";")
+                    variables = [v.strip() for v in variables]
+
+                    components = []
+                    for i, param in enumerate(template.get("parameters", [])):
+                        if param["type"] in ["header", "body"] and i < len(variables):
+                            components.append(
+                                {
+                                    "type": param["type"].lower(),
+                                    "parameters": [
+                                        {"type": "text", "text": variables[i]}
+                                    ],
+                                }
+                            )
+                    if components:
+                        data["template"]["components"] = components
+
+                logger.debug("Sending template message: %s", json.dumps(data))
+            else:
+                # For non-template messages, send as regular text
+                data = {
+                    "messaging_product": "whatsapp",
+                    "recipient_type": "individual",
+                    "to": recipient,
+                    "type": "text",
+                    "text": {"preview_url": False, "body": message},
+                }
+                logger.debug("Sending text message: %s", json.dumps(data))
+
+            response = requests.post(url, headers=headers, json=data)
+            response.raise_for_status()
+
+            log_http_response(response)
+            logger.info("Message sent successfully to %s", recipient)
+
+        except requests.exceptions.RequestException as e:
+            logger.error("Error sending message: %s", str(e))
+            if hasattr(e.response, "text"):
+                logger.error("Response: %s", e.response.text)
+            raise HTTPException(
+                status_code=500, detail="Failed to send WhatsApp message: %s" % str(e)
+            )
 
     async def verify_webhook(self, mode: str, token: str, challenge: str) -> str:
         """Verify webhook endpoint for WhatsApp API."""
@@ -179,57 +195,31 @@ class WhatsAppBot:
                 logger.error("Response: %s", e.response.text)
 
     async def send_typing_indicator(self, recipient: str) -> None:
-        """Send typing indicator to recipient."""
+        """Send typing indicator to recipient"""
         try:
-            logger.info(f"Sending typing indicator to {recipient}")
-            
-            recipient = recipient.strip().replace(" ", "")
-            if not recipient.startswith("+"):
-                recipient = f"+{recipient}"
-
-            url = f"{self.base_url}/{self.phone_number_id}/messages"
-            
             data = {
                 "messaging_product": "whatsapp",
                 "recipient_type": "individual",
                 "to": recipient,
-                "type": "interactive",
-                "interactive": {
-                    "type": "button",
-                    "body": {
-                        "text": "..."
-                    },
-                    "action": {
-                        "buttons": [
-                            {
-                                "type": "reply",
-                                "reply": {
-                                    "id": "typing",
-                                    "title": "⌛"
-                                }
-                            }
-                        ]
-                    }
-                }
+                "type": "contacts",
             }
 
             async with httpx.AsyncClient() as client:
                 response = await client.post(
-                    url,
+                    f"{self.base_url}/{self.phone_number_id}/messages",
                     headers=self.headers,
                     json=data,
-                    timeout=5.0
+                    timeout=10.0,
                 )
                 response.raise_for_status()
-                logger.info(f"Typing indicator sent to {recipient}")
 
         except Exception as e:
-            logger.error(f"Error sending typing indicator: {str(e)}")
-            if hasattr(e, 'response'):
-                logger.error(f"Response: {e.response.text}")
+            logger.error("Error sending typing indicator: %s", str(e))
+            if hasattr(e, "response"):
+                logger.error("Response: %s", e.response.text)
 
     async def get_templates(self) -> Dict[str, Any]:
-        """Fetch templates from WhatsApp Business API."""
+        """Fetch templates from WhatsApp Business API"""
         try:
             url = f"{self.base_url}/{settings.BUSINESS_ID}/message_templates"
 

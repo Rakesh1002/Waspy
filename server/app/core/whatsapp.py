@@ -2,10 +2,12 @@ import httpx
 from typing import List, Optional, Dict, Any
 from app.core.config import settings
 from app.schemas.whatsapp import PhoneNumber
-from fastapi import HTTPException
+from fastapi import HTTPException, Request
 import logging
 import json
 import sys
+import hmac
+import hashlib
 
 # Force debug logging
 logger = logging.getLogger(__name__)
@@ -406,40 +408,136 @@ class WhatsAppClient:
                     )
                     
                 data = response.json()
+                templates = data.get("data", [])
                 
-                if not data.get("data"):
+                # Find the specific template by name
+                template = None
+                for t in templates:
+                    if t.get("name") == template_name:
+                        template = t
+                        break
+                        
+                if not template:
                     raise HTTPException(
                         status_code=404,
                         detail=f"Template {template_name} not found"
                     )
-                    
-                template = data["data"][0]
                 
-                # Return the processed template content
-                return {
-                    "name": template["name"],
-                    "language": template["language"],
-                    "status": template["status"],
-                    "components": [
-                        {
-                            "type": comp["type"].lower(),
-                            "text": comp["text"],
-                            "format": comp.get("format", "TEXT").lower(),
-                            "example": comp.get("example", {})
-                        }
-                        for comp in template["components"]
-                    ]
+                # Process components into the expected format
+                content = {
+                    "header": None,
+                    "body": None,
+                    "footer": None,
+                    "buttons": []
                 }
                 
-        except httpx.HTTPError as e:
-            logger.error(f"HTTP error in get_template_content: {str(e)}")
-            raise HTTPException(
-                status_code=500,
-                detail=f"Failed to fetch template content: {str(e)}"
-            )
+                for component in template.get("components", []):
+                    component_type = component.get("type", "").lower()
+                    
+                    if component_type == "header":
+                        content["header"] = {
+                            "format": component.get("format", "text").lower(),
+                            "text": component.get("text", "")
+                        }
+                    elif component_type == "body":
+                        content["body"] = component.get("text", "")
+                    elif component_type == "footer":
+                        content["footer"] = component.get("text", "")
+                    elif component_type == "buttons":
+                        content["buttons"] = [
+                            {
+                                "type": btn.get("type", ""),
+                                "text": btn.get("text", ""),
+                                "url": btn.get("url", "") if btn.get("type") == "URL" else None
+                            }
+                            for btn in component.get("buttons", [])
+                        ]
+                
+                # Return the processed template data
+                return {
+                    "name": template.get("name", ""),
+                    "language": template.get("language", ""),
+                    "status": template.get("status", ""),
+                    "content": content
+                }
+                
+        except HTTPException as http_error:
+            logger.error(f"HTTP error in get_template_content: {str(http_error)}")
+            raise http_error
         except Exception as e:
             logger.error(f"Error in get_template_content: {str(e)}")
             raise HTTPException(
                 status_code=500,
                 detail=f"Internal server error: {str(e)}"
             ) 
+
+class WhatsAppWebhook:
+    def __init__(self):
+        self.app_secret = settings.APP_SECRET
+        self.verify_token = settings.VERIFY_TOKEN
+
+    async def verify_webhook(self, mode: str, token: str, challenge: str) -> int:
+        """Verify webhook subscription"""
+        if mode == 'subscribe' and token == self.verify_token:
+            return int(challenge)
+        raise HTTPException(status_code=403, detail="Webhook verification failed")
+
+    def verify_signature(self, request: Request, payload: bytes) -> bool:
+        """Verify that the webhook payload is from Meta"""
+        signature = request.headers.get('x-hub-signature-256', '')
+        
+        if not signature:
+            return False
+            
+        expected_signature = hmac.new(
+            self.app_secret.encode('utf-8'),
+            payload,
+            hashlib.sha256
+        ).hexdigest()
+        
+        return hmac.compare_digest(f'sha256={expected_signature}', signature)
+
+    async def handle_webhook(self, payload: Dict[str, Any]):
+        """Handle incoming webhook events"""
+        try:
+            if payload['object'] != 'whatsapp_business_account':
+                raise HTTPException(status_code=400, detail="Invalid webhook object")
+
+            for entry in payload['entry']:
+                for change in entry['changes']:
+                    await self._process_webhook_change(change)
+                    
+        except Exception as e:
+            logger.error(f"Error processing webhook: {str(e)}")
+            raise HTTPException(status_code=500, detail="Error processing webhook")
+
+    async def _process_webhook_change(self, change: Dict[str, Any]):
+        """Process different types of webhook changes"""
+        field = change['field']
+        value = change['value']
+
+        handlers = {
+            'messages': self._handle_message,
+            'message_template_status_update': self._handle_template_status,
+            'phone_number_quality_update': self._handle_quality_update,
+            # Add more handlers as needed
+        }
+
+        handler = handlers.get(field)
+        if handler:
+            await handler(value)
+        else:
+            logger.info(f"Unhandled webhook field: {field}")
+
+    async def _handle_message(self, value: Dict[str, Any]):
+        """Handle incoming messages"""
+        # Implement message handling logic
+        logger.info(f"Received message: {value}")
+
+    async def _handle_template_status(self, value: Dict[str, Any]):
+        """Handle template status updates"""
+        logger.info(f"Template status update: {value}")
+
+    async def _handle_quality_update(self, value: Dict[str, Any]):
+        """Handle phone number quality updates"""
+        logger.info(f"Quality update: {value}") 

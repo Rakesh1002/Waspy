@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Any, Dict, List
 from pydantic import BaseModel
 
 class WebhookVerification(BaseModel):
@@ -17,3 +17,11 @@ class WebhookResponse(BaseModel):
     success: bool
     message: str
     data: Optional[dict] = None
+
+class Message(BaseModel):
+    role: str
+    content: str
+
+class WebhookRequest(BaseModel):
+    object: str
+    entry: List[Dict[str, Any]]

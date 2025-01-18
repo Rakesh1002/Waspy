@@ -1,11 +1,15 @@
 from typing import Any, Dict
+
 from fastapi import HTTPException
 from loguru import logger
 
-class WhatsAppError(HTTPException):
+
+class WhatsAppError(Exception):
     def __init__(self, message: str, status_code: int = 500, details: Dict[str, Any] = None):
+        self.message = message
+        self.status_code = status_code
         self.details = details or {}
-        super().__init__(status_code=status_code, detail=message)
+        super().__init__(self.message)
 
 def handle_whatsapp_error(error: Exception) -> None:
     """Centralized error handler for WhatsApp operations"""
@@ -14,8 +18,11 @@ def handle_whatsapp_error(error: Exception) -> None:
         raise error
 
     if isinstance(error, WhatsAppError):
-        logger.error(f"WhatsApp Error: {error.detail}")
-        raise error
+        logger.error(f"WhatsApp Error: {error.message}")
+        raise HTTPException(
+            status_code=error.status_code,
+            detail=error.message
+        )
 
     # Handle unexpected errors
     error_msg = str(error)

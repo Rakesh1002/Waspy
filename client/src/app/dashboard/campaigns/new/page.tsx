@@ -1,7 +1,13 @@
 "use client";
 
 import { MessageForm } from "@/components/message-form";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { useRouter } from "next/navigation";
 import {
   Breadcrumb,
@@ -34,7 +40,9 @@ export default function NewCampaignPage() {
               </BreadcrumbItem>
               <BreadcrumbSeparator className="hidden md:block" />
               <BreadcrumbItem className="hidden md:block">
-                <BreadcrumbLink href="/dashboard/campaigns">Campaigns</BreadcrumbLink>
+                <BreadcrumbLink href="/dashboard/campaigns">
+                  Campaigns
+                </BreadcrumbLink>
               </BreadcrumbItem>
               <BreadcrumbSeparator className="hidden md:block" />
               <BreadcrumbItem>
@@ -68,4 +76,4 @@ export default function NewCampaignPage() {
       </main>
     </div>
   );
-} 
+}
