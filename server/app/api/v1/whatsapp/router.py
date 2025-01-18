@@ -16,7 +16,8 @@ from app.schemas.whatsapp import (
     PhoneNumber, 
     VerificationRequest, 
     VerificationCode,
-    WhatsAppMessageRequest
+    WhatsAppMessageRequest,
+    WhatsAppTemplate
 )
 from app.services.whatsapp_bot import WhatsAppBot
 from app.services.whatsapp_service import WhatsAppService
@@ -26,13 +27,14 @@ from app.utils.whatsapp_utils import (
     is_valid_whatsapp_message,
     extract_whatsapp_message_data
 )
-from app.schemas.campaign import CampaignCreate, TemplateComponent
+from app.schemas.campaign import CampaignCreate, TemplateComponent, CampaignDetails
 from app.models.user import User
 from app.models.campaign import Campaign
 from app.services.openai_service import OpenAIService
 
 router = APIRouter(prefix="/whatsapp", tags=["whatsapp"])
 whatsapp_bot = WhatsAppBot()
+whatsapp_service = WhatsAppService()
 
 class RegisterPhoneRequest(BaseModel):
     phone_number_id: str
@@ -676,3 +678,236 @@ async def health_check(
             "error": str(e),
             "timestamp": datetime.utcnow().isoformat()
         } 
+
+@router.get("/campaigns/{campaign_id}", response_model=CampaignDetails)
+async def get_campaign_details(
+    campaign_id: str,
+    db: Session = Depends(get_db),
+    current_user: Dict[str, Any] = Depends(get_current_user)
+) -> Dict[str, Any]:
+    """Get detailed information about a specific campaign."""
+    try:
+        # Get campaign from database with user check
+        campaign = db.query(Campaign).filter(
+            Campaign.id == campaign_id,
+            Campaign.user_id == current_user["id"]
+        ).first()
+        
+        if not campaign:
+            raise HTTPException(
+                status_code=404, 
+                detail="Campaign not found or you don't have access to it"
+            )
+
+        # Fetch template content
+        template_content = await whatsapp_service.get_template_content(campaign.template_name)
+
+        # Construct the final message with template content
+        final_message = whatsapp_service.construct_final_message(
+            campaign.template_name,
+            campaign.template_data or {
+                "components": campaign.template_components,
+                "language": {"code": campaign.template_language}
+            },
+            template_content
+        )
+
+        # Get message metrics
+        metrics = {
+            "delivered": 0,
+            "read": 0,
+            "button_clicks": [],
+            "status": "unknown",
+            "timestamp": None
+        }
+        
+        if hasattr(campaign, 'message_id') and campaign.message_id:
+            try:
+                metrics = await whatsapp_service.get_message_metrics(campaign.message_id)
+            except Exception as e:
+                logger.error(f"Error fetching metrics for campaign {campaign_id}: {str(e)}")
+
+        # Construct response
+        return {
+            "id": campaign.id,
+            "name": campaign.name,
+            "status": campaign.status,
+            "template_name": campaign.template_name,
+            "template_content": {
+                "raw": template_content or {},
+                "final_message": final_message
+            },
+            "recipients": campaign.recipients or [],
+            "metrics": {
+                "sent": campaign.sent_count,
+                "delivered": metrics.get("delivered", 0),
+                "read": metrics.get("read", 0),
+                "clicked": metrics.get("button_clicks", []),
+                "status": metrics.get("status", "unknown"),
+                "last_status_update": metrics.get("timestamp")
+            },
+            "created_at": campaign.created_at.isoformat(),
+            "completed_at": campaign.completed_at.isoformat() if campaign.completed_at else None,
+            "error_count": campaign.error_count
+        }
+
+    except HTTPException as he:
+        raise he
+    except Exception as e:
+        logger.error(f"Failed to fetch campaign details: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to fetch campaign details: {str(e)}"
+        )
+
+@router.delete("/campaigns/{campaign_id}")
+async def delete_campaign(
+    campaign_id: str,
+    db: Session = Depends(get_db),
+    current_user: Dict[str, Any] = Depends(get_current_user)
+) -> Dict[str, Any]:
+    """Delete a campaign."""
+    try:
+        # Get campaign with user check
+        campaign = db.query(Campaign).filter(
+            Campaign.id == campaign_id,
+            Campaign.user_id == current_user["id"]
+        ).first()
+        
+        if not campaign:
+            raise HTTPException(
+                status_code=404, 
+                detail="Campaign not found or you don't have access to it"
+            )
+
+        # Delete the campaign
+        db.delete(campaign)
+        db.commit()
+
+        return {
+            "success": True, 
+            "message": "Campaign deleted successfully"
+        }
+
+    except HTTPException as he:
+        raise he
+    except Exception as e:
+        db.rollback()
+        logger.error(f"Failed to delete campaign: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to delete campaign: {str(e)}"
+        ) 
+
+@router.post("/templates/create")
+async def create_template(
+    template: WhatsAppTemplate,
+    whatsapp_service: WhatsAppService = Depends(get_whatsapp_service)
+) -> Dict[str, Any]:
+    """Create a new WhatsApp message template"""
+    try:
+        client = WhatsAppClient()
+        result = await client.create_template(
+            name=template.name,
+            language=template.language,
+            components=template.components
+        )
+        return {"success": True, "data": result}
+    except Exception as e:
+        logger.error(f"Error creating template: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.put("/templates/{template_name}")
+async def update_template(
+    template_name: str,
+    template: WhatsAppTemplate,
+    whatsapp_service: WhatsAppService = Depends(get_whatsapp_service)
+) -> Dict[str, Any]:
+    """Update an existing WhatsApp message template"""
+    try:
+        client = WhatsAppClient()
+        result = await client.update_template(
+            template_name=template_name,
+            language=template.language,
+            components=template.components
+        )
+        return {"success": True, "data": result}
+    except Exception as e:
+        logger.error(f"Error updating template: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.delete("/templates/{template_name}")
+async def delete_template(
+    template_name: str,
+    whatsapp_service: WhatsAppService = Depends(get_whatsapp_service)
+) -> Dict[str, Any]:
+    """Delete a WhatsApp message template"""
+    try:
+        client = WhatsAppClient()
+        result = await client.delete_template(template_name=template_name)
+        return {"success": True, "data": result}
+    except Exception as e:
+        logger.error(f"Error deleting template: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e)) 
+
+@router.get("/templates/{template_name}")
+async def get_template(
+    template_name: str,
+    whatsapp_service: WhatsAppService = Depends(get_whatsapp_service)
+) -> Dict[str, Any]:
+    try:
+        client = WhatsAppClient()
+        response = await client.get_template_content(
+            phone_number_id=settings.PHONE_NUMBER_ID,
+            template_name=template_name
+        )
+        
+        if not response or "data" not in response:
+            raise HTTPException(status_code=404, detail="Template not found")
+            
+        templates = response["data"]
+        template = next((t for t in templates if t["name"] == template_name), None)
+        
+        if not template:
+            raise HTTPException(status_code=404, detail="Template not found")
+            
+        # Format the response in a consistent way
+        formatted_response = {
+            "name": template["name"],
+            "language": template["language"],
+            "status": template["status"],
+            "id": template["id"],
+            "content": {
+                "header": next((
+                    {"format": c["format"].lower(), "text": c["text"]}
+                    for c in template["components"]
+                    if c["type"] == "HEADER"
+                ), None),
+                "body": next((
+                    c["text"] for c in template["components"]
+                    if c["type"] == "BODY"
+                ), ""),
+                "footer": next((
+                    c["text"] for c in template["components"]
+                    if c["type"] == "FOOTER"
+                ), None),
+                "buttons": next((
+                    c["buttons"] for c in template["components"]
+                    if c["type"] == "BUTTONS"
+                ), [])
+            }
+        }
+        
+        return {
+            "success": True,
+            "data": formatted_response
+        }
+        
+    except HTTPException as he:
+        raise he
+    except Exception as e:
+        logger.error(f"Error fetching template: {str(e)}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error fetching template: {str(e)}"
+        ) 

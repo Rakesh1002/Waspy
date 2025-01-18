@@ -25,8 +25,15 @@ export default {
       return session;
     },
     async redirect({ url, baseUrl }) {
-      // Redirect to the dashboard after sign-in
-      return url.startsWith(baseUrl) ? url : baseUrl + "/dashboard";
+      // After sign in, force redirect to dashboard
+      if (url.includes('callback') && url.includes('google')) {
+        return `${baseUrl}/dashboard`;
+      }
+
+      // For other cases, use default behavior
+      if (url.startsWith(baseUrl)) return url;
+      if (url.startsWith("/")) return `${baseUrl}${url}`;
+      return baseUrl;
     },
   },
 } satisfies NextAuthConfig;

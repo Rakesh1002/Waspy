@@ -4,17 +4,15 @@ import * as React from "react";
 import {
   BookOpen,
   Bot,
-  Frame,
   LifeBuoy,
-  Map,
   PieChart,
   Send,
   Settings2,
+  FileText,
 } from "lucide-react";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
 import { NavMain } from "@/components/nav-main";
-import { NavProjects } from "@/components/nav-projects";
 import { NavSecondary } from "@/components/nav-secondary";
 import { NavUser } from "@/components/nav-user";
 import {
@@ -34,6 +32,21 @@ const data = {
       url: "/dashboard",
       icon: PieChart,
       isActive: true,
+    },
+    {
+      title: "Templates",
+      url: "/dashboard/templates",
+      icon: FileText,
+      items: [
+        {
+          title: "All Templates",
+          url: "/dashboard/templates",
+        },
+        {
+          title: "Create Template",
+          url: "/dashboard/templates/new",
+        },
+      ],
     },
     {
       title: "Campaigns",
@@ -56,8 +69,8 @@ const data = {
       icon: Bot,
       items: [
         {
-          title: "Compose",
-          url: "/dashboard/messages/compose",
+          title: "Agent",
+          url: "/dashboard/messages/agent",
         },
         {
           title: "History",
@@ -112,23 +125,7 @@ const data = {
       icon: Send,
     },
   ],
-  projects: [
-    {
-      name: "Design Engineering",
-      url: "#",
-      icon: Frame,
-    },
-    {
-      name: "Sales & Marketing",
-      url: "#",
-      icon: PieChart,
-    },
-    {
-      name: "Travel",
-      url: "#",
-      icon: Map,
-    },
-  ],
+  
 };
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
@@ -160,8 +157,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain} />
-        <NavProjects projects={data.projects} />
+          <NavMain items={data.navMain} />
         <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>

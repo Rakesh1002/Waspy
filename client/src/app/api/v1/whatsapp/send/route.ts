@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
 
     const response = await fetch(
-      `${process.env.API_URL}/api/v1/whatsapp/send`,
+      `${process.env.NEXT_PUBLIC_API_URL}/api/v1/whatsapp/send`,
       {
         method: "POST",
         headers: {

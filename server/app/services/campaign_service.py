@@ -14,10 +14,19 @@ class CampaignService:
 
     def create_campaign(self, user_id: str, campaign_in: CampaignCreate) -> Campaign:
         """Create a new campaign."""
+        campaign_data = campaign_in.dict()
+        
+        # Store template data
+        template_data = {
+            "components": campaign_data.get("template_components", []),
+            "language": {"code": campaign_data.get("template_language", "en")}
+        }
+        
         campaign = Campaign(
             id=str(uuid.uuid4()),
             user_id=user_id,
-            **campaign_in.dict()
+            template_data=template_data,
+            **campaign_data
         )
         self.db.add(campaign)
         self.db.commit()
@@ -60,7 +69,7 @@ class CampaignService:
             if campaign.recipient_type == "individual":
                 for recipient in campaign.recipients:
                     try:
-                        await self.whatsapp_service.send_template_message(
+                        response = await self.whatsapp_service.send_template_message(
                             phone_number=recipient,
                             template_name=campaign.template_name,
                             template_data={
@@ -68,11 +77,13 @@ class CampaignService:
                                 "components": campaign.template_components
                             }
                         )
+                        # Store the message ID from the response
+                        if response and response.get("messages"):
+                            campaign.message_id = response["messages"][0]["id"]
                         campaign.sent_count += 1
                     except Exception as e:
                         campaign.error_count += 1
-                        # Log the error but continue with other recipients
-                        print(f"Error sending to {recipient}: {str(e)}")
+                        logger.error(f"Error sending to {recipient}: {str(e)}")
 
             campaign.status = "completed"
             campaign.completed_at = datetime.utcnow()

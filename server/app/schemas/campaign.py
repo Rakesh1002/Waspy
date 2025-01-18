@@ -1,6 +1,6 @@
 """Campaign schemas."""
 from datetime import datetime
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Optional, Union, Any
 from pydantic import BaseModel, Field
 
 
@@ -59,3 +59,37 @@ class Campaign(CampaignBase):
         """Pydantic config."""
 
         from_attributes = True 
+
+
+class CampaignMetrics(BaseModel):
+    sent: int
+    delivered: int
+    read: int
+    clicked: List[Dict[str, Any]]
+
+
+class TemplateContent(BaseModel):
+    raw: Dict[str, Any]
+    final_message: str
+
+
+class MessageMetrics(BaseModel):
+    sent: int
+    delivered: int
+    read: int
+    clicked: List[Dict[str, Any]]
+    status: str
+    last_status_update: Optional[str]
+
+
+class CampaignDetails(BaseModel):
+    id: str
+    name: str
+    status: str
+    template_name: str
+    template_content: TemplateContent
+    recipients: List[str]
+    metrics: MessageMetrics
+    created_at: str
+    completed_at: Optional[str] = None
+    error_count: int 

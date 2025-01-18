@@ -2,8 +2,8 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   env: {
-    API_URL: process.env.API_URL,
-    API_KEY: process.env.API_KEY,
+    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
+    NEXT_PUBLIC_API_KEY: process.env.NEXT_PUBLIC_API_KEY,
   },
   images: {
     domains: ["lh3.googleusercontent.com"], // For Google OAuth profile pictures

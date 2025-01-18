@@ -5,8 +5,9 @@ import { Button } from "@/components/ui/button";
 import { RefreshCw } from "lucide-react";
 import { toast } from "sonner";
 import { PhoneNumberList } from "@/components/settings/phone-number-list";
-import { Breadcrumbs } from "@/components/ui/breadcrumbs";
-import type { BreadcrumbItem } from "@/components/ui/breadcrumbs";
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
+import { Separator } from "@/components/ui/separator";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 
 interface PhoneNumber {
   id: string;
@@ -17,11 +18,6 @@ interface PhoneNumber {
   whatsapp_registered: boolean;
 }
 
-const breadcrumbItems: BreadcrumbItem[] = [
-  { title: "Dashboard", link: "/dashboard" },
-  { title: "Settings", link: "/dashboard/settings" },
-  { title: "Phone Numbers", link: "/dashboard/settings/phone-numbers" },
-];
 
 export default function PhoneNumbersPage() {
   const [loading, setLoading] = useState(true);
@@ -82,9 +78,25 @@ export default function PhoneNumbersPage() {
 
   return (
     <div className="flex flex-col min-h-screen">
-      <div className="border-b">
-        <div className="container flex-1 space-y-4 p-8 pt-6">
-          <Breadcrumbs items={breadcrumbItems} />
+      <header className="sticky top-0 z-10 flex h-16 shrink-0 items-center border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="flex w-full items-center gap-2 px-4 lg:px-8">
+          <SidebarTrigger className="-ml-2" />
+          <Separator orientation="vertical" className="mr-2 h-4" />
+          <Breadcrumb>
+            <BreadcrumbList>
+              <BreadcrumbItem className="hidden md:block">
+                <BreadcrumbLink href="/dashboard">Dashboard</BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator className="hidden md:block" />
+              <BreadcrumbItem>
+                <BreadcrumbPage>Phone Numbers</BreadcrumbPage>
+              </BreadcrumbItem>
+            </BreadcrumbList>
+          </Breadcrumb>
+        </div>
+      </header>
+      <main className="flex-1">
+        <div className="mx-auto max-w-6xl space-y-4 p-4 lg:p-8 lg:pt-6">
           <div className="flex items-center justify-between">
             <h2 className="text-3xl font-bold tracking-tight">Phone Numbers</h2>
             <Button variant="outline" onClick={handleSync} disabled={syncing}>
@@ -102,9 +114,9 @@ export default function PhoneNumbersPage() {
             </Button>
           </div>
         </div>
-      </div>
-
-      <div className="container flex-1 space-y-4 p-8">
+      
+      
+        <div className="mx-auto max-w-6xl space-y-4 p-4 lg:p-8 lg:pt-6">
         {loading ? (
           <div className="flex items-center justify-center p-8">
             <RefreshCw className="h-6 w-6 animate-spin" />
@@ -116,6 +128,7 @@ export default function PhoneNumbersPage() {
           />
         )}
       </div>
+      </main>
     </div>
   );
 }

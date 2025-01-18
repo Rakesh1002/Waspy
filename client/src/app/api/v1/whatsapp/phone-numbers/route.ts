@@ -10,7 +10,7 @@ export async function GET() {
       });
     }
 
-    const apiUrl = process.env.API_URL;
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
     if (!apiUrl) {
       throw new Error("API_URL not configured");
     }

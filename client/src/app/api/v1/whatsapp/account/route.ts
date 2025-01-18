@@ -10,7 +10,7 @@ export async function POST(request: Request) {
       });
     }
 
-    const apiUrl = process.env.API_URL;
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
     if (!apiUrl) {
       throw new Error("API_URL not configured");
     }
@@ -23,7 +23,7 @@ export async function POST(request: Request) {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${process.env.API_KEY}`,
+        Authorization: `Bearer ${process.env.NEXT_PUBLIC_API_KEY}`,
       },
       body: JSON.stringify(body),
     });

@@ -28,7 +28,7 @@ export async function GET(request: NextRequest) {
 
   try {
     const response = await fetch(
-      `${process.env.API_URL}/api/v1/whatsapp/template-content?phone_number_id=${phone_number_id}&template_name=${template_name}`,
+      `${process.env.NEXT_PUBLIC_API_URL}/api/v1/whatsapp/template-content?phone_number_id=${phone_number_id}&template_name=${template_name}`,
       {
         headers: {
           "Content-Type": "application/json",

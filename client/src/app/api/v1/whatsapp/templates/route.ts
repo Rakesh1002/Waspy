@@ -2,8 +2,8 @@ import { NextResponse } from "next/server";
 
 export async function GET() {
   try {
-    const apiUrl = process.env.API_URL;
-    const apiKey = process.env.API_KEY;
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+    const apiKey = process.env.NEXT_PUBLIC_API_KEY;
 
     if (!apiUrl || !apiKey) {
       throw new Error("Missing API configuration");
