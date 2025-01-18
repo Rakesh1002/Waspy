@@ -37,6 +37,9 @@ class Settings(BaseSettings):
     # WhatsApp Configuration
     WHATSAPP_TOKEN: str
     PHONE_NUMBER_ID: str
+    APP_ID: str
+    APP_SECRET: str
+    VERSION: str
     VERSION: str = "v21.0"
     BUSINESS_ID: str
     WEBHOOK_URL: str
