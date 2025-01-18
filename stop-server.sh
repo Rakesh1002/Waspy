@@ -13,6 +13,16 @@ kill_port() {
     fi
 }
 
+# Function to kill process by name
+kill_process() {
+    local process_name=$1
+    echo "Checking for $process_name processes..."
+    if pgrep -f "$process_name" > /dev/null; then
+        echo "Killing $process_name processes"
+        sudo pkill -f "$process_name" 2>/dev/null || true
+    fi
+}
+
 # Stop the main server
 if [ -f server.pid ]; then
     PID=$(cat server.pid)
@@ -32,6 +42,10 @@ if [ -f tunnel.pid ]; then
 else
     echo "No tunnel PID file found"
 fi
+
+# Kill ngrok processes
+kill_process "ngrok"
+kill_port 4040  # ngrok admin interface port
 
 # Force kill any processes on our ports
 kill_port 8000  # Uvicorn

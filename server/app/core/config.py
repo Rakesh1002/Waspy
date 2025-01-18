@@ -40,7 +40,6 @@ class Settings(BaseSettings):
     PHONE_NUMBER_ID: str
     APP_ID: str
     APP_SECRET: str
-    RECIPIENT_WAID: str
     VERSION: str
     BUSINESS_ID: str
     WEBHOOK_URL: str

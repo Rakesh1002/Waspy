@@ -6,7 +6,7 @@
     "predev": "pnpm install && cd client && pnpm install && npx prisma generate && cd ../server && poetry install",
     "dev": "docker compose -f docker-compose.dev.yml up -d && pnpm run dev:services || docker-compose -f docker-compose.dev.yml up -d && pnpm run dev:services",
     "dev:services": "concurrently \"pnpm run dev:backend\" \"pnpm run dev:frontend\"",
-    "dev:tunnel": "ngrok http --domain=pegasus-still-lovely.ngrok-free.app 8000",
+    "dev:tunnel": "ngrok http --domain=dragon-useful-hideously.ngrok-free.app 8000",
     "dev:frontend": "cd client && pnpm dev",
     "dev:backend": "cd server && poetry run uvicorn app.main:app --reload",
     "build": "pnpm run build:all",
