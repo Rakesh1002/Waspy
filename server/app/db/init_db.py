@@ -72,6 +72,108 @@ ORDERS = [
         "status": "pending",
         "delivery_date": datetime.utcnow() + timedelta(days=4),
     },
+    # Orders for 7044151056
+    {
+        "order_id": "ORD101112",
+        "customer_phone": "+917044151056",
+        "status": "processing",
+        "delivery_date": datetime.utcnow() + timedelta(days=2),
+    },
+    {
+        "order_id": "ORD131415",
+        "customer_phone": "+917044151056",
+        "status": "delivered",
+        "delivery_date": datetime.utcnow() - timedelta(days=3),
+    },
+    {
+        "order_id": "ORD161718",
+        "customer_phone": "+917044151056",
+        "status": "pending",
+        "delivery_date": datetime.utcnow() + timedelta(days=5),
+    },
+    # Orders for 7042105230
+    {
+        "order_id": "ORD192021",
+        "customer_phone": "+917042105230",
+        "status": "shipped",
+        "delivery_date": datetime.utcnow() + timedelta(days=1),
+    },
+    {
+        "order_id": "ORD222324",
+        "customer_phone": "+917042105230",
+        "status": "processing",
+        "delivery_date": datetime.utcnow() + timedelta(days=4),
+    },
+    {
+        "order_id": "ORD252627",
+        "customer_phone": "+917042105230",
+        "status": "cancelled",
+        "delivery_date": None,
+    },
+    # Additional orders for 7044151056
+    {
+        "order_id": "ORD282930",
+        "customer_phone": "+917044151056",
+        "status": "shipped",
+        "delivery_date": datetime.utcnow() + timedelta(hours=12),
+    },
+    {
+        "order_id": "ORD313233",
+        "customer_phone": "+917044151056",
+        "status": "delivered",
+        "delivery_date": datetime.utcnow() - timedelta(days=10),
+    },
+    {
+        "order_id": "ORD343536",
+        "customer_phone": "+917044151056",
+        "status": "cancelled",
+        "delivery_date": None,
+    },
+    # Additional orders for 7042105230
+    {
+        "order_id": "ORD373839",
+        "customer_phone": "+917042105230",
+        "status": "delivered",
+        "delivery_date": datetime.utcnow() - timedelta(days=7),
+    },
+    {
+        "order_id": "ORD404142",
+        "customer_phone": "+917042105230",
+        "status": "pending",
+        "delivery_date": datetime.utcnow() + timedelta(days=6),
+    },
+    {
+        "order_id": "ORD434445",
+        "customer_phone": "+917042105230",
+        "status": "shipped",
+        "delivery_date": datetime.utcnow() + timedelta(hours=36),
+    },
+    # Additional orders for 8102998806
+    {
+        "order_id": "ORD464748",
+        "customer_phone": "+918102998806",
+        "status": "processing",
+        "delivery_date": datetime.utcnow() + timedelta(days=4),
+    },
+    {
+        "order_id": "ORD495051",
+        "customer_phone": "+918102998806",
+        "status": "shipped",
+        "delivery_date": datetime.utcnow() + timedelta(hours=18),
+    },
+    # Additional orders for 9019545645
+    {
+        "order_id": "ORD525354",
+        "customer_phone": "+919019545645",
+        "status": "processing",
+        "delivery_date": datetime.utcnow() + timedelta(days=3),
+    },
+    {
+        "order_id": "ORD555657",
+        "customer_phone": "+919019545645",
+        "status": "delivered",
+        "delivery_date": datetime.utcnow() - timedelta(days=15),
+    },
 ]
 
 # Sample knowledge base data

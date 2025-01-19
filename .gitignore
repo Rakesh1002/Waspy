@@ -176,3 +176,4 @@ tunnel.log
 tunnel.pid
 nohup.out
 
+.vercel
