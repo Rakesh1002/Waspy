@@ -66,6 +66,7 @@ export async function POST(request: NextRequest) {
           Authorization: `Bearer ${token.access_token}`,
         },
         body: JSON.stringify(templateData),
+        credentials: "include",
       }
     );
 

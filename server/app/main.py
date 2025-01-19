@@ -21,7 +21,7 @@ setup_logging()
 # Configure CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # For development only
+    allow_origins=["https://waspy.unquest.ai", "http://localhost:3000"],  # Add your production and development domains
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

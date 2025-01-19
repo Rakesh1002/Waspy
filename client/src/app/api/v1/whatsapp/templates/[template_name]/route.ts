@@ -31,6 +31,7 @@ export async function GET(
       headers: {
         Authorization: `Bearer ${token.access_token}`,
       },
+      credentials: "include",
     });
 
     if (!response.ok) {

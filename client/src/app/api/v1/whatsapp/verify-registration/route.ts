@@ -33,6 +33,7 @@ export async function GET(request: Request) {
         headers: {
           Authorization: `Bearer ${process.env.API_KEY}`,
         },
+        credentials: "include",
       }
     );
 

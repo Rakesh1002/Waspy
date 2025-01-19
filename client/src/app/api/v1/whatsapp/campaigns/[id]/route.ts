@@ -33,6 +33,7 @@ export async function DELETE(
           Authorization: `Bearer ${token.access_token}`,
           "Content-Type": "application/json",
         },
+        credentials: "include",
       }
     );
 

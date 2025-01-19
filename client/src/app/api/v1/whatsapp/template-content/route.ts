@@ -35,6 +35,7 @@ export async function GET(request: NextRequest) {
           Authorization: `Bearer ${token.access_token}`,
           "ngrok-skip-browser-warning": "true",
         },
+        credentials: "include",
       }
     );
 

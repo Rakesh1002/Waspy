@@ -26,6 +26,7 @@ export async function POST(request: Request) {
         Authorization: `Bearer ${process.env.API_KEY}`,
       },
       body: JSON.stringify(body),
+      credentials: "include",
     });
 
     console.log("[PHONE_REGISTER] Backend response status:", response.status);

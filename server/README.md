@@ -53,3 +53,35 @@ poetry run uvicorn app.main:app --reload --port 8000
    brew services start postgresql
    psql -d postgres -c "CREATE EXTENSION vector;"
 ```
+
+7. Check subscription status:
+subscribe your WhatsApp Business Account to your app using the following endpoint:
+
+curl -X POST \
+'https://graph.facebook.com/v21.0/WHATSAPP_BUSINESS_ACCOUNT_ID/subscribed_apps' \
+-H 'Authorization: Bearer ACCESS_TOKEN'
+This should give you the following response:
+
+{
+  "success": true
+}
+Then you can confirm the subscription by calling the same endpoint with GET:
+
+curl -X GET \
+'https://graph.facebook.com/v21.0/WHATSAPP_BUSINESS_ACCOUNT_ID/subscribed_apps' \
+-H 'Authorization: Bearer ACCESS_TOKEN'
+Which should look like this:
+
+{
+    "data": [
+        {
+            "whatsapp_business_api_data": {
+                "category": "Your App Category",
+                "link": "https://www.facebook.com/games/?app_id=1234",
+                "name": "Your App Name",
+                "id": "1234"
+            }
+        }
+    ]
+}
+You can find more info here: https://developers.facebook.com/docs/whatsapp/solution-providers/get-started-for-solution-partners#subscribe-waba
