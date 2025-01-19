@@ -4,8 +4,8 @@ import type { NextAuthConfig } from "next-auth";
 export default {
   providers: [
     Google({
-      clientId: process.env.GOOGLE_CLIENT_ID!,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+      clientId: process.env.AUTH_GOOGLE_ID!,
+      clientSecret: process.env.AUTH_GOOGLE_SECRET!,
     }),
   ],
   pages: {
@@ -25,8 +25,13 @@ export default {
       return session;
     },
     async redirect({ url, baseUrl }) {
-      // After sign in, force redirect to dashboard
-      if (url.includes("callback") && url.includes("google")) {
+      // Handles the sign-in case
+      if (url === baseUrl || url === `${baseUrl}/`) {
+        return `${baseUrl}/dashboard`;
+      }
+
+      // Always redirect to dashboard after sign in
+      if (url.includes("/api/auth/callback")) {
         return `${baseUrl}/dashboard`;
       }
 
