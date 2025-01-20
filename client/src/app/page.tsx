@@ -1,37 +1,32 @@
 import { HeroSection } from "@/components/home/hero-section";
-import { FeaturesSection } from "@/components/home/features-section";
-import { CaseStudiesSection } from "@/components/home/case-studies-section";
-import { StatsSection } from "@/components/home/stats-section";
 import { Nav } from "@/components/layout/nav";
-import { AnimatedBackground } from "@/components/ui/animated-background";
-import { auth } from "@/auth";
+// import { auth } from "@/auth";
 import { Footer } from "@/components/layout/footer";
-import { ContactForm } from "@/components/home/contact-form";
+import { DynamicSections } from "@/components/home/dynamic-sections";
+import { AnimatedGradientBackground } from "@/components/ui/animated-gradient-background";
 
 export default async function Home() {
-  const session = await auth();
+  // const session = await auth();
 
   return (
     <div className="relative flex min-h-screen flex-col">
-      <AnimatedBackground />
+      <AnimatedGradientBackground
+        gradientBackgroundStart="rgb(8, 8, 12)"
+        gradientBackgroundEnd="rgb(12, 12, 20)"
+        firstColor="30, 64, 175" // Subtle blue
+        secondColor="79, 70, 229" // Soft indigo
+        thirdColor="67, 56, 202" // Muted violet
+        fourthColor="59, 130, 246" // Light blue
+        fifthColor="99, 102, 241" // Soft indigo
+        pointerColor="124, 58, 237" // Purple
+        blendingValue="soft-light"
+        size="120%"
+        className="-z-50"
+      />
       <Nav />
       <main className="flex-1 pt-16">
-        <HeroSection isAuthenticated={!!session} />
-        <div className="relative">
-          <div className="absolute inset-0 bg-gradient-to-b from-primary/10 via-primary/20 to-primary/10" />
-          <section id="features" className="relative">
-            <FeaturesSection />
-          </section>
-          <section id="case-studies" className="relative">
-            <CaseStudiesSection />
-          </section>
-          <section id="stats" className="relative">
-            <StatsSection />
-          </section>
-        </div>
-        <section id="contact" className="relative">
-          <ContactForm />
-        </section>
+        <HeroSection />
+        <DynamicSections />
       </main>
       <Footer />
     </div>

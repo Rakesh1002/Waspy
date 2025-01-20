@@ -91,3 +91,14 @@ model Contact {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+model DemoRequest {
+  id        String   @id @default(cuid())
+  name      String
+  email     String
+  company   String
+  phone     String?
+  useCase   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

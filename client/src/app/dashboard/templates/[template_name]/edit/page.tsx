@@ -13,7 +13,7 @@ interface PageProps {
 
 export default async function EditTemplatePage({ params }: PageProps) {
   const { template_name } = await params;
-  
+
   return (
     <div className="flex min-h-screen flex-col">
       <main className="flex-1">
