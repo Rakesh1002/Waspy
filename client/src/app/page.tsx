@@ -13,13 +13,13 @@ export default async function Home() {
       <AnimatedGradientBackground
         gradientBackgroundStart="rgb(8, 8, 12)"
         gradientBackgroundEnd="rgb(12, 12, 20)"
-        firstColor="30, 64, 175" // Subtle blue
+        firstColor="67, 56, 202" // Subtle blue
         secondColor="79, 70, 229" // Soft indigo
         thirdColor="67, 56, 202" // Muted violet
         fourthColor="59, 130, 246" // Light blue
         fifthColor="99, 102, 241" // Soft indigo
         pointerColor="124, 58, 237" // Purple
-        blendingValue="soft-light"
+        blendingValue="hard-light"
         size="120%"
         className="-z-50"
       />

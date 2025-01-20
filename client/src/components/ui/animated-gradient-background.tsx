@@ -23,11 +23,11 @@ export function AnimatedGradientBackground({
   className,
   gradientBackgroundStart = "rgb(255, 255, 255)",
   gradientBackgroundEnd = "rgb(250, 250, 255)",
-  firstColor = "125, 211, 252",
-  secondColor = "147, 197, 253",
-  thirdColor = "196, 181, 253",
-  fourthColor = "251, 207, 232",
-  fifthColor = "167, 243, 208",
+  firstColor = "226, 232, 240",
+  secondColor = "219, 234, 254",
+  thirdColor = "224, 231, 255",
+  fourthColor = "236, 254, 255",
+  fifthColor = "239, 246, 255",
   pointerColor = "148, 163, 184",
   size = "150%",
   blendingValue = "soft-light",
@@ -151,31 +151,31 @@ export function AnimatedGradientBackground({
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 2 }}
-        className="absolute inset-0"
+        className="absolute inset-0 bg-white/80 dark:bg-transparent"
       >
         {/* Subtle gradient orbs with adjusted opacity */}
-        <div className="absolute top-0 -left-4 w-[40rem] h-[40rem] bg-[hsl(var(--gradient-1))] rounded-full mix-blend-multiply filter blur-[128px] opacity-[0.08] animate-glow" />
-        <div className="absolute top-0 -right-4 w-[40rem] h-[40rem] bg-[hsl(var(--gradient-2))] rounded-full mix-blend-multiply filter blur-[128px] opacity-[0.08] animate-glow animation-delay-2000" />
-        <div className="absolute -bottom-8 left-20 w-[40rem] h-[40rem] bg-[hsl(var(--gradient-3))] rounded-full mix-blend-multiply filter blur-[128px] opacity-[0.08] animate-glow animation-delay-4000" />
+        <div className="absolute top-0 -left-4 w-[40rem] h-[40rem] bg-[hsl(var(--gradient-1))] rounded-full mix-blend-multiply filter blur-[128px] opacity-[0.05] animate-glow" />
+        <div className="absolute top-0 -right-4 w-[40rem] h-[40rem] bg-[hsl(var(--gradient-2))] rounded-full mix-blend-multiply filter blur-[128px] opacity-[0.05] animate-glow animation-delay-2000" />
+        <div className="absolute -bottom-8 left-20 w-[40rem] h-[40rem] bg-[hsl(var(--gradient-3))] rounded-full mix-blend-multiply filter blur-[128px] opacity-[0.05] animate-glow animation-delay-4000" />
 
         {/* Gradient animation container with adjusted blur and opacity */}
         <div className="gradients-container h-full w-full blur-[120px]">
           <div
             className={cn(
-              `absolute [background:radial-gradient(circle_at_center,_rgba(var(--first-color),_0.4)_0,_rgba(var(--first-color),_0)_70%)_no-repeat]`,
+              `absolute [background:radial-gradient(circle_at_center,_rgba(var(--first-color),_0.3)_0,_rgba(var(--first-color),_0)_70%)_no-repeat]`,
               `[mix-blend-mode:var(--blending-value)] w-[var(--size)] h-[var(--size)] top-[calc(50%-var(--size)/2)] left-[calc(50%-var(--size)/2)]`,
               `[transform-origin:center_center]`,
               `animate-first`,
-              `opacity-70`
+              `opacity-50`
             )}
           />
           {interactive && (
             <div
               ref={interactiveRef}
               className={cn(
-                `absolute [background:radial-gradient(circle_at_center,_rgba(var(--pointer-color),_0.3)_0,_rgba(var(--pointer-color),_0)_70%)_no-repeat]`,
+                `absolute [background:radial-gradient(circle_at_center,_rgba(var(--pointer-color),_0.2)_0,_rgba(var(--pointer-color),_0)_70%)_no-repeat]`,
                 `[mix-blend-mode:var(--blending-value)] w-full h-full -top-1/2 -left-1/2`,
-                `opacity-40`
+                `opacity-30`
               )}
             />
           )}

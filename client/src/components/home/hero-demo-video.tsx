@@ -56,7 +56,7 @@ export function HeroDemoVideo() {
   }, []);
 
   return (
-    <div className="relative w-full">
+    <div className="relative w-full h-full flex items-center justify-center">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{
@@ -65,15 +65,15 @@ export function HeroDemoVideo() {
         }}
         transition={{ duration: 0.5 }}
         className={cn(
-          "transition-opacity duration-500",
+          "transition-opacity duration-500 w-full h-full",
+          "sm:scale-[0.65] md:scale-[0.75] lg:scale-[0.85] xl:scale-[1]",
           !isVideoLoaded && "opacity-0"
         )}
       >
         <Iphone15Pro
           videoSrc="/demo.mp4"
           ref={videoRef}
-          scale={0.8}
-          className="mx-auto"
+          className="w-full h-full object-contain transform-gpu"
         />
       </motion.div>
       {!isVideoLoaded && !error && (

@@ -36,25 +36,27 @@ export function HeroSection() {
         variants={staggerContainer}
         initial="hidden"
         animate="show"
-        className="container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative min-h-[calc(100vh-4rem)] py-20"
+        className="container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative min-h-screen py-12 sm:py-16 lg:py-20 flex items-center"
       >
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
+        <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center w-full">
           {/* Left side - Content */}
           <motion.div
             variants={fadeIn}
-            className="space-y-8 max-w-2xl text-center lg:text-left"
+            className="space-y-6 sm:space-y-8 max-w-2xl mx-auto lg:mx-0 w-full"
           >
             {/* Top Badge */}
-            <GlassPane className="inline-flex px-6 py-3">
-              <span className="inline-flex items-center text-sm font-medium text-blue-700 dark:text-blue-400">
-                <Sparkles className="mr-2 h-4 w-4 text-blue-500" />
-                Create Whatsapp AI agents in minutes
-              </span>
-            </GlassPane>
+            <div className="flex justify-center lg:justify-start">
+              <GlassPane className="inline-flex px-4 sm:px-6 py-2 sm:py-3">
+                <span className="inline-flex items-center text-xs sm:text-sm font-medium text-blue-700 dark:text-blue-400">
+                  <Sparkles className="mr-2 h-3 w-3 sm:h-4 sm:w-4 text-blue-500" />
+                  Create Whatsapp AI agents in minutes
+                </span>
+              </GlassPane>
+            </div>
 
             {/* Main Title */}
-            <h1 className="text-4xl font-bold tracking-tight sm:text-6xl md:text-7xl lg:text-7xl flex flex-col items-center lg:items-start gap-4">
-              <span className="text-slate-800 dark:text-slate-200">
+            <h1 className="text-center lg:text-left text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold tracking-tight flex flex-col items-center lg:items-start gap-2 sm:gap-4">
+              <span className="text-slate-900 dark:text-slate-200">
                 WhatsApp
               </span>
               <span className="relative inline-flex h-[1.1em] overflow-hidden">
@@ -65,45 +67,44 @@ export function HeroSection() {
                     animate={{ y: 0, opacity: 1 }}
                     exit={{ y: -50, opacity: 0 }}
                     transition={{ duration: 0.3, ease: "easeOut" }}
-                    className="text-blue-600/80 dark:text-blue-400/90"
+                    className="text-blue-700 dark:text-blue-400"
                   >
                     {words[currentWordIndex]}
                   </motion.span>
                 </AnimatePresence>
               </span>
-              <span className="bg-gradient-to-r from-blue-600 via-blue-500 to-sky-400 bg-clip-text text-transparent font-extrabold leading-[1.2]">
+              <span className="bg-gradient-to-r from-blue-700 via-blue-600 to-blue-500 dark:from-blue-500 dark:via-blue-400 dark:to-blue-300 bg-clip-text text-transparent font-extrabold leading-[1.2]">
                 Made Intelligent
               </span>
             </h1>
 
             {/* Description */}
-            <p className="text-slate-600 dark:text-slate-400 text-xl leading-relaxed">
+            <p className="text-center lg:text-left text-base sm:text-lg lg:text-xl text-slate-700 dark:text-slate-300 leading-relaxed max-w-xl mx-auto lg:mx-0 font-medium">
               Build, deploy, and scale custom WhatsApp AI agents with our
               enterprise platform. No coding required.
             </p>
 
-            {/* CTA Buttons */}
-            <motion.div
-              variants={fadeIn}
-              className="flex flex-col sm:flex-row gap-4 items-center lg:items-start pt-4"
-            >
+            {/* CTA Button */}
+            <div className="flex justify-center lg:justify-start pt-4">
               <Button
                 size="lg"
                 onClick={() => setDemoModalOpen(true)}
-                className="h-12 px-8 text-base font-medium bg-blue-600 hover:bg-blue-700 transition-colors group text-white"
+                className="h-10 sm:h-12 px-6 sm:px-8 text-sm sm:text-base font-medium bg-blue-600 hover:bg-blue-700 transition-colors group text-white"
               >
                 Book a Demo
-                <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
+                <ArrowRight className="ml-2 h-4 w-4 sm:h-5 sm:w-5 transition-transform group-hover:translate-x-1" />
               </Button>
-            </motion.div>
+            </div>
           </motion.div>
 
           {/* Right side - iPhone Demo */}
           <motion.div
             variants={fadeIn}
-            className="relative flex justify-center lg:justify-end w-full max-w-[173px] sm:max-w-[216px] lg:max-w-[260px] mx-auto"
+            className="relative flex items-center justify-center w-full h-full"
           >
-            <HeroDemoVideo />
+            <div className="w-full aspect-[9/19] max-w-[260px] sm:max-w-[300px] md:max-w-[320px] lg:max-w-[340px] xl:max-w-[380px] mx-auto">
+              <HeroDemoVideo />
+            </div>
           </motion.div>
         </div>
       </motion.section>
