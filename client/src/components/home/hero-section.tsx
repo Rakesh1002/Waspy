@@ -102,7 +102,16 @@ export function HeroSection() {
             variants={fadeIn}
             className="relative flex items-center justify-center w-full h-full"
           >
-            <div className="w-full aspect-[9/19] max-w-[260px] sm:max-w-[300px] md:max-w-[320px] lg:max-w-[340px] xl:max-w-[380px] mx-auto">
+            <div 
+              className="w-full mx-auto"
+              style={{
+                maxWidth: '340px',
+                aspectRatio: '390/844',
+                transform: 'translate3d(0,0,0)',
+                WebkitTransform: 'translate3d(0,0,0)',
+                WebkitBackfaceVisibility: 'hidden'
+              }}
+            >
               <HeroDemoVideo />
             </div>
           </motion.div>

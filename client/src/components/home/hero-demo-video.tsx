@@ -14,7 +14,6 @@ export function HeroDemoVideo() {
     const video = videoRef.current;
     if (!video) return;
 
-    // Preload the video
     video.preload = "auto";
 
     const handleCanPlay = () => {
@@ -42,7 +41,6 @@ export function HeroDemoVideo() {
     video.addEventListener("timeupdate", handleTimeUpdate);
     video.addEventListener("error", handleError);
 
-    // Load video source
     if (video.src !== "/demo.mp4") {
       video.src = "/demo.mp4";
       video.load();
@@ -65,16 +63,33 @@ export function HeroDemoVideo() {
         }}
         transition={{ duration: 0.5 }}
         className={cn(
-          "transition-opacity duration-500 w-full h-full",
-          "sm:scale-[0.65] md:scale-[0.75] lg:scale-[0.85] xl:scale-[1]",
+          "w-full h-full flex items-center justify-center",
+          "transform-gpu",
           !isVideoLoaded && "opacity-0"
         )}
+        style={{
+          WebkitBackfaceVisibility: 'hidden',
+          backfaceVisibility: 'hidden',
+          transform: 'translate3d(0,0,0)',
+          WebkitTransform: 'translate3d(0,0,0)',
+          maxWidth: '100%',
+          maxHeight: '100%',
+          aspectRatio: '390/844'
+        }}
       >
-        <Iphone15Pro
-          videoSrc="/demo.mp4"
-          ref={videoRef}
-          className="w-full h-full object-contain transform-gpu"
-        />
+        <div className="relative w-full h-full" style={{ maxWidth: '380px' }}>
+          <Iphone15Pro
+            videoSrc="/demo.mp4"
+            ref={videoRef}
+            className="w-full h-auto"
+            style={{
+              transform: 'translate3d(0,0,0)',
+              WebkitTransform: 'translate3d(0,0,0)',
+              maxWidth: '100%',
+              height: 'auto'
+            }}
+          />
+        </div>
       </motion.div>
       {!isVideoLoaded && !error && (
         <div className="absolute inset-0 flex items-center justify-center">
