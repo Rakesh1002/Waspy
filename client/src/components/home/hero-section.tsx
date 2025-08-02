@@ -38,11 +38,11 @@ export function HeroSection() {
         animate="show"
         className="container max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative min-h-screen py-12 sm:py-16 lg:py-20 flex items-center"
       >
-        <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center w-full">
+        <div className="grid lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-12 items-center w-full min-h-[500px] sm:min-h-[600px] lg:min-h-0">
           {/* Left side - Content */}
           <motion.div
             variants={fadeIn}
-            className="space-y-6 sm:space-y-8 max-w-2xl mx-auto lg:mx-0 w-full"
+            className="space-y-6 sm:space-y-8 max-w-2xl mx-auto lg:mx-0 w-full order-1"
           >
             {/* Top Badge */}
             <div className="flex justify-center lg:justify-start">
@@ -100,19 +100,22 @@ export function HeroSection() {
           {/* Right side - iPhone Demo */}
           <motion.div
             variants={fadeIn}
-            className="relative flex items-center justify-center w-full h-full"
+            className="relative flex items-center justify-center w-full h-full order-2"
           >
-            <div 
-              className="w-full mx-auto"
-              style={{
-                maxWidth: '340px',
-                aspectRatio: '390/844',
-                transform: 'translate3d(0,0,0)',
-                WebkitTransform: 'translate3d(0,0,0)',
-                WebkitBackfaceVisibility: 'hidden'
-              }}
-            >
-              <HeroDemoVideo />
+            <div className="w-full flex justify-center items-center px-4 sm:px-0">
+              <div
+                className="relative mx-auto flex items-center justify-center"
+                style={{
+                  width: "min(300px, 85vw)",
+                  maxWidth: "340px",
+                  aspectRatio: "390/844",
+                  transform: "translate3d(0,0,0)",
+                  WebkitTransform: "translate3d(0,0,0)",
+                  WebkitBackfaceVisibility: "hidden",
+                }}
+              >
+                <HeroDemoVideo />
+              </div>
             </div>
           </motion.div>
         </div>

@@ -68,25 +68,30 @@ export function HeroDemoVideo() {
           !isVideoLoaded && "opacity-0"
         )}
         style={{
-          WebkitBackfaceVisibility: 'hidden',
-          backfaceVisibility: 'hidden',
-          transform: 'translate3d(0,0,0)',
-          WebkitTransform: 'translate3d(0,0,0)',
-          maxWidth: '100%',
-          maxHeight: '100%',
-          aspectRatio: '390/844'
+          WebkitBackfaceVisibility: "hidden",
+          backfaceVisibility: "hidden",
+          transform: "translate3d(0,0,0)",
+          WebkitTransform: "translate3d(0,0,0)",
+          maxWidth: "100%",
+          maxHeight: "100%",
+          aspectRatio: "390/844",
         }}
       >
-        <div className="relative w-full h-full" style={{ maxWidth: '380px' }}>
+        <div className="relative w-full h-full flex items-center justify-center">
           <Iphone15Pro
             videoSrc="/demo.mp4"
             ref={videoRef}
-            className="w-full h-auto"
+            scale={0.9}
+            className="w-full h-auto max-w-full"
             style={{
-              transform: 'translate3d(0,0,0)',
-              WebkitTransform: 'translate3d(0,0,0)',
-              maxWidth: '100%',
-              height: 'auto'
+              transform: "translate3d(0,0,0)",
+              WebkitTransform: "translate3d(0,0,0)",
+              width: "100%",
+              height: "auto",
+              maxWidth: "100%",
+              maxHeight: "100%",
+              display: "block",
+              margin: "0 auto",
             }}
           />
         </div>
