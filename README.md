@@ -110,7 +110,7 @@ An enterprise-grade AI-powered WhatsApp support automation platform built with N
 1. Clone and setup:
 
 ```bash
-git clone https://github.com/yourusername/waspy.git
+git clone https://github.com/rakesh1002/waspy.git
 cd waspy
 
 # Install package managers

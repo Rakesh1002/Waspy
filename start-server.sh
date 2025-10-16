@@ -25,17 +25,17 @@ docker compose -f docker-compose.dev.yml up -d
 # Wait for services to be ready
 sleep 10
 
-# Start the main server with nohup
-nohup pnpm dev > server.log 2>&1 &
+# Start the backend and frontend services (without tunnel) with nohup
+nohup pnpm run dev:services:no-tunnel > server.log 2>&1 &
 echo $! > server.pid
 
-# Wait for the main server to start
+# Wait for the backend and frontend to start
 sleep 10
 
 # Start the tunnel in another process
 nohup pnpm dev:tunnel > tunnel.log 2>&1 &
 echo $! > tunnel.pid
 
-echo "Main server started with PID $(cat server.pid). Logs in server.log"
+echo "Backend and frontend started with PID $(cat server.pid). Logs in server.log"
 echo "Tunnel started with PID $(cat tunnel.pid). Logs in tunnel.log"
 echo "To check tunnel URL: tail -f tunnel.log" 
